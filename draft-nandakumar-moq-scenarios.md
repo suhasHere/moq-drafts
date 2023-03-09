@@ -39,7 +39,12 @@ When developing the data model for MoQ, we realized that different WG participan
 
 # Scenarios
 
+One ambition of MoQ is to define a single QUIC based transport for multiple transmission scenarios, including streaming scenarios currently using RTMP and conferencing scenarios currently using WebRTC. Ideally, this would enable support in Content Distribution Networks for both types of scenarios.
+
 ## Streaming Scenarios
+
+Streaming scenarios typically separate "content ingestion" and "content distribution". Content is provided by one or several "emitters"
+
 ~~~
 live.tw.tv
 OBS Client -> Ingest Server 
