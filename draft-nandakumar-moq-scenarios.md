@@ -33,8 +33,13 @@ that they place on the MoQ data model.
 
 --- middle
 
+# Introduction
+
+When developing the data model for MoQ, we realized that different WG participants were making different assumptions about the role of streams, broadcast or emitters, and also on the delivery constraints for objects compositing different streams. This draft studies different scenarios and details their requirements.
+
 # Scenarios
 
+## Streaming Scenarios
 ~~~
 live.tw.tv
 OBS Client -> Ingest Server 
@@ -44,7 +49,10 @@ Distribution Server -> Clients
   Catalog that has tracks 
  Latency = 500ms - 2 seconds
                    (maps to GOP length)
+~~~
 
+## Conferencing Scenarios
+~~~
 Conferencing - A
   publishers - Conferencing Server - Subscribers
                 [auth server, media logic]
@@ -60,13 +68,18 @@ Conferencing - B
     Track Namespace               
   Latency - 200ms 
             boundary by GOP length is not practical 
+~~~
 
-Unit of grouping tracks
-  Emission (non conferencing)
-  Multiple Emissions and their tracks into one container (conferencing A/B)
+# Unit of grouping tracks
 
-Transmission
+Two views:
 
+*  Emission (non conferencing)
+*  Multiple Emissions and their tracks into one container (conferencing A/B)
+
+# Transmission requirements
+
+~~~
   Streaming scenario - easy resynchronization - rewind, fast forward
                      ==> GOP are typically rather short (~2s)
 
