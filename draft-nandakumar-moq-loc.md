@@ -45,7 +45,7 @@ a low overhead format.
 
 {mainmatter}
 
-# Introduction
+# Introduction - Mo
 
 This specification describes a media container format for
 encoded and encrypted audio and video media data to be used
@@ -69,7 +69,8 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD","SH
 
 TODO
 
-# Payload Format {#payload}
+
+# Payload Format {#payload} - Mo
 
 This section specifies format of the encoded payload for several
 audio and video codecs.
@@ -107,7 +108,7 @@ The encoded audio data MUST conform to format as defined in Section 2 of [!@WC-O
 This section specified metadata that needs to be carried out as payload metadata. Payload metadata provides 
 necessary information for intermediaries to perform necessary switching decisions when the payload is inaccessible, possibly due to encryption.
 
-Section ((#reg)) provides framework for registering 
+Section XXX provides framework for registering 
 new payload metadata fields that aren't defined by
 this specification
 
@@ -117,7 +118,7 @@ Following metadata MUST be captures for each media frame
 
 *Sequence Number* identifies a sequentially increasing variable length integer that is incremented per encoded media frame.
 
-*Encoding Timestamp in Microsecond* capture the wall-clock time of the encoded media frame.
+*Encoding Timestamp in Microseconds* capture the wall-clock time of the encoded media frame.
 
 ## Video Metadata
  TODO fill this 
@@ -136,7 +137,7 @@ attributes to be specified
 *name* User friendly identifier for the metadata. 
 *datatype* for the representing the metadata on wire
 *id* a varint ien
-
+*value* 
 
 # Payload Encryption
 
@@ -145,7 +146,7 @@ with keys from symmetric keying mechanisms, such a MLS, and the payload itself i
 
 # Container Serialization
 
-## Raw TLS Style structure
+# MOQ Transport Mapping
 
 ## Extra
 What needs to be agreed on or standardized?
