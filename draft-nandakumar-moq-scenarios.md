@@ -75,6 +75,30 @@ Conferencing - B
             boundary by GOP length is not practical 
 ~~~
 
+# Scenario differences
+
+We find that scenarios differs in multiple ways. In the previous sections we detail the obvious differences, such as different network topologies or different latency targets, but other factors also come in play.
+
+## Interval between access points
+
+In the streaming scenarios, there is an important emphasis on resynchronization, characterized by a short distance between "access points". This can be used for features like fast-forward or rewinding, which are common in non-real-time streaming. For real-time streaming experiences such as watching a sport event, frequent access points allow "channel surfers" to quickly join the broadcast and enjoy the experience. The interval between these access points will often be just a few seconds.
+
+In video encoding, each access point is mapped to a fully encoded frame that can be used as reference for the "group of blocks". The encoding of these reference frames is typically much larger than the differential encoding of the following frames. This creates a peak of traffic at the beginning of the group. This peak is much easier to absorb in streaming applications that tolerate higher latencies than interactive video conferences. In practice, real time conferences tend to use much longer groups, resulting in higher compression ratios and smoother bandwidth consumption.
+
+Of course, having longer blocks create other issues. Realtime conferences also need to accomodate the occasional occasional late comer, or the disconnected user who want to resynchronize after a network event. This drives a need for synchronization "between access points". For example, rather than waiting for 30 seconds before connecting, the user might quickly download the "key" frames of the past 30 seconds and replay them in order to "synchronize" the video decoder.
+
+## Intervals and congestion
+
+When streaming is organized as a series of short groups of objects, it is possible to use the groups as units of congestion control. The objects of a single stream or of related streams can be organized by order of delivery, starting with the most important in the group. In case of congestion, when there is not enough bandwidth to send everything, the objects at the "tail" of the transmission order get dropped, and transmission of the next group starts.
+
+These "group oriented" mechanism are effectively making an adaptation decision at the end of each group. The latency of the control loop is the duration of the group, which implies that the target latency will be tied to the duration of the group. But for real time conferencing other priorities drive the group duration to large values such as 30 seconds, which then require making decisions "inside the group", not "at the end of it".
+
+## Planning in advance or not
+
+If the entire set of objects to be sent in a group is known at the beginning of a group transmission, it is possible to order these objects according to the "delivery order" that will provide the best experience, instead of merely sending them according to their planned replay time. For example, taking a simple example of a "time based" layering, we would want to first send all the 15 fps frames, then all the 30 fps frames, then all the 60 fps frames. The receiver will get the objects that fit in the available bandwidth, and then render the frames in their natural order, playing the whole group at either 15 fps, 30 fps, or 60fps.
+
+This kind of planning in advance is not possible for real time conferences. If we want to target a latency of 100 or 200 ms, we can buffer at most 6 or maybe 12 frames, certainly not the whole group. The order of transmission will have to be rather close to the order of capture. If the bandwidth is limited, some content will have to be pruned "in real time" rather than waiting the end of the group.
+
 # Unit of grouping tracks
 
 Two views:
@@ -82,13 +106,4 @@ Two views:
 *  Emission (non conferencing)
 *  Multiple Emissions and their tracks into one container (conferencing A/B)
 
-# Transmission requirements
 
-~~~
-  Streaming scenario - easy resynchronization - rewind, fast forward
-                     ==> GOP are typically rather short (~2s)
-
-  Interactive Scenario - avoid too many restart points, makes transmission
-                         inefficient over short periods of time ( peaks of bW requests for the i-frame)
-                        If restart points are used to recover, they are spread out too far. It drives resynchronization between restart points 
-~~~
