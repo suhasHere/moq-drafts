@@ -52,7 +52,6 @@ encoded and encrypted audio and video media data to be used
 for interactive media usecases, with the goal of it being
 a low overhead format.
 
-
 The container format description is specified for
 most common audio and video codecs along with
 necessary metadata needed for identifying the media
@@ -103,29 +102,41 @@ The encoded video data MUST conform to EncodedVideoChunk Data format as defined 
 
 The encoded audio data MUST conform to format as defined in Section 2 of [!@WC-OPUS] when the bitstream is in opus format. Bitstream of ogg format MUST NOT be used.
 
-# Payload Metadata
+# Payload Header Data
 
-This section specifies mandatory metadata that needs to be carried out
-as payload metadata. For optional metadata, an extensible framework is
-provided.
+This section specified metadata that needs to be carried out as payload metadata. Payload metadata provides 
+necessary information for intermediaries to perform necessary switching decisions when the payload is inaccessible, possibly due to encryption.
 
-## Common Metadata
+Section ((#reg)) provides framework for registering 
+new payload metadata fields that aren't defined by
+this specification
+
+## Common Header Data
 
 Following metadata MUST be captures for each media frame
 
-*Sequence Number* identifies a sequentially increasing integer that is incremented per encoded media frame.
+*Sequence Number* identifies a sequentially increasing variable length integer that is incremented per encoded media frame.
 
 *Encoding Timestamp in Microsecond* capture the wall-clock time of the encoded media frame.
 
-# Metadata Registration
-
-This section details the procedures to register metadata field that might be useful for a particular class of media applications. This subsection further defines metadata for audio and
+## Video Metadata
+ TODO fill this 
 
 ## Audio Metadata
 
-## Video Metadata
+*Audio Level* captures the magnitude of the audio level of the corresponding audio frame and valus in encoded in 7 bits as defined in the Section 3 of RFC6464
 
-## Optional Fields
+# Metadata Registration
+
+This section details the procedures to register metadata field that might be useful for a particular class of media applications. 
+
+Resistering a given metadata field requires following 
+attributes to be specified
+
+*name* User friendly identifier for the metadata. 
+*datatype* for the representing the metadata on wire
+*id* a varint ien
+
 
 # Payload Encryption
 
@@ -134,9 +145,7 @@ with keys from symmetric keying mechanisms, such a MLS, and the payload itself i
 
 # Container Serialization
 
-## Raw
-
-## CBOR
+## Raw TLS Style structure
 
 ## Extra
 What needs to be agreed on or standardized?
