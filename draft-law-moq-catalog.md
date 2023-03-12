@@ -1,5 +1,5 @@
 ---
-title: "Catalog Specification for Media Over Quic Transport"
+title: "Catalog Specification for MoQ Base Protocol compliant streaming formats"
 abbrev: "catalog moq"
 category: info
 
