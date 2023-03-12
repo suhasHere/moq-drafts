@@ -48,6 +48,8 @@ One ambition of MoQ is to define a single QUIC based transport for multiple tran
 
 ## Streaming Scenarios
 
+This section few scenarios for streaming use-cases. The scenarios listed are not exhaustive and doesn't intend to capture all possible application and architectures.
+
 Streaming scenarios typically separate "content ingestion" and "content distribution". Content is provided by one or several "emitters"
 
 ~~~
@@ -61,24 +63,100 @@ Distribution Server -> Clients
                    (maps to GOP length)
 ~~~
 
-## Conferencing Scenarios
-~~~
-Conferencing - A
-  publishers - Conferencing Server - Subscribers
-                [auth server, media logic]
-  ==> similar to combination of 2 examples above
-  Latency - 200ms
+## Conferencing Scenarios - Classic
 
-Conferencing - B
-  publishers - Relays - Subscribers
-               [origin server for authorization,
-                catalog management]
-       Multiple emitters in a catalog
-       Subscribers subscribe to emitter trackId
-    Track Namespace
-  Latency - 200ms
-            boundary by GOP length is not practical
+A interactive conferencing typically work under the
+glass-to-glass latency to be around 200ms and is made up
+of multiplcitiy of participant with varying capabilities
+and operating under varying network conditions.
+
+A typical conferencing session comprises of:
+
+- Mutiple emitters, publishing on multiple tracks (audio, video tracks at different qualities)
+
+- A media switch, sourcing tracks that represent a subset of tracks from across all
+  the emitters. Such subset may represent tracks representing top 5 speakers at
+  higher qualities and lot of tracks for rest of the emitters at lower qualities.
+
+- Multiple receivers, with varied receiving capacity (bandwidth limited), subscribing to subset of the tracks
+
+
 ~~~
+                                                       SFU:t1, E1:t2, E3:t6
+ .───.  E1: t1,t2,t3,t4                                             .───.
+( E1  )─────────┐                                      ┌─────────▶ ( S1  )
+ `───'          │                                      │            `───'
+                │                                      │
+                └────────▶───────────────────┐         │
+                         │                   │─────────┘
+ .───.    E2: t1,t2      │       SFU         │       SFU:t1,E1:t2    .───.
+( E2  )─────────────────▶│                   │────────────────────▶( S2  )
+ `───'                   │                   │                      `───'
+               ┌────────▶└───────────────────┴─────────┐
+               │                                       │
+               │                                       │
+               │                                       │
+               │                                       │
+ .───.         │                                       │            .───.
+( E3  )────────┘                                       └──────────▶( S3  )
+ `───'     E3: t1,t2,t3,t4,t5,t6                     E3: t2,        `───'
+                                                     E1: t2,
+                                                     E2: t2,
+                                                     SFU: t1
+~~~
+
+
+
+Above setup brings in following properties on the data model for the
+transport protocol
+
+- Media Switches to source new tracks but retain media payload from
+  the original emitters. This implies new Track IDs sourced from the
+  SFU, with obejct payload unchanged from the original emitters.
+
+- Media Switches to propogate subset of tracks as-is from the emitters
+  to the subscribers. This implies Track IDs to be scoped end to end.
+
+- Subscribers to explictily request multiple appropriate qualities and
+  dynamically move between the qualtiies during the course of the session
+
+Another evolving topology for the interactive use-case is to use
+multiple distribution networks for delivering the media and thus move
+media switching functionality from purpose built SFUs to the
+core distribution network as shown below
+
+~~~
+ E1: t1,t2,t3,t4              Distribution Network A
+                                                            SFU:t1, E1:t2, E3:t6
+    .───.                   ┌────────┐      ┌────────┐                 .───.
+   ( E1  )──────────────────│ Relay  │──────│ Relay  ├──────────────▶ ( S1  )
+    `───'                   └─────┬──┘      └──┬─────┘                 `───'
+                                  │ ┌────────┐ │
+   E2: t1,t2                      └─┤ Relay  │─┘
+                      ┌────────────▶└────┬───┘                   SFU:t1,E1:t2
+    .───.             │                  │                             .───.
+   ( E2  )────────────┘                  │                   ┌───────▶( S2  )
+    `───'                                │                   │         `───'
+                             ┌────────┐  │   ┌────────┬──────┘
+                    ┌────────┤ Relay  │──┴───│ Relay  │───────┐
+                    │        └─────┬──┘      └──┬─────┘       │
+                    │              │ ┌────────┐ │             │
+                    │              └─┤ Relay  │─┘             │
+    .───.           │                └────────┘               │        .───.
+   ( E3  )──────────┘         Distribution Network B          └──────▶( S3  )
+    `───'                                                              `───'
+     E3: t1,t2,t3,t4,t5,t6                                    E3: t2,
+                                                              E1: t2,
+                                                              E2: t2,
+                                                              SFU: t1
+~~~
+
+Such a topology needs to meet all the properties listed in a classic
+style setup, however having multiple distribution networks
+and relying on the distribution networks to carryout the media delivery,
+brins in further towards a data model that enables tracks to be uniquely
+identifiable across the distribution networks and not just within a
+single distribution network.
 
 # Scenario differences
 
@@ -251,7 +329,7 @@ and marking these streams with different priorities. The exact
 solution will have to be defined in a draft that specifies transport
 priorities.
 
-# High Loss Networks 
+# High Loss Networks
 
 Web conferencing systems are used on networks with well over 20% packet
 loss and when this happens, it is often on connections with a relatively
