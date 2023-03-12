@@ -333,3 +333,15 @@ rate.
 This can result in scenarios where very small audio objects are sent at
 a rate of several hundreds packets per second with a high network loss
 rate.
+
+# Security and Privacy Considerations
+
+This document provides an abstract analysis of MoQ scenarios, but does
+not detail any security considerations.
+
+
+# IANA Considerations
+
+This document makes no request of IANA.
+
+-- back
