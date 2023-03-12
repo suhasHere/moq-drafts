@@ -213,7 +213,34 @@ and marking these streams with different priorities. The exact
 solution will have to be defined in a draft that specifies transport
 priorities.
 
+# High Loss Networks 
 
+Web conferencing systems are used on networks with well over 20% packet
+loss and when this happens, it is often on connections with a relatively
+large round trip time. In these situtation, forward error correction or
+redundant transmitions are used to keep a provide a reasonable user
+experience. This can result in scenarios where audio packets are sent at
+a rate of several hundreds packets per second with a high loss rate.
 
+When mapping this situation onto QUIC streams two approaches are:
 
+1. Map all the audio object to one stream
+
+2. Map each audio object to it's own stream
+
+Neither of these works out well. If the first case, the high packet loss
+rate along with medium to large RTT results in significant head of line
+blocking and the end user glass to glass latency gets large resulting in
+a poor user experience. This issue is one of the reasons that redundancy
+and forward error correction techniques are preferred over
+retransmission for recovery in network condition like this.
+
+In the case where each audio object is mapped to it's own QUIC stream, a
+large portion of the streams end up with retransmissions, cancelation,
+or both. This results in a significant amount of addition bandwith usage
+which contributes to more congestion and loss.
+
+The optimal solution in this case is to use datagrams with a time to
+live on the object so they are discarded if they are can not be
+delivered in time.
 
