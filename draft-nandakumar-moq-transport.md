@@ -1,32 +1,30 @@
 ---
-title = "MoQ Transport (moqt) - Unified Media Delivery Protocol over QUIC"
-abbrev = "moqt"
-ipr= "trust200902"
-area = "transport"
-workgroup = ""
-keyword = ["realtime","moqt"]
+title: MoQ Transport (moqt) - Unified Media Delivery Protocol over QUIC
+abbrev: moqt
+docname: draft-nandakumar-moq-transport-latest
+date: {DATE}
+category: info
 
-[seriesInfo]
-status = "informational"
-name = "Internet-Draft"
-value = "draft-nandakumar-moq-base-protocol"
-stream = "IETF"
+ipr: trust200902
+area: General
+submissionType: IETF
+workgroup: Independent Submission
+keyword: Internet-Draft
 
-[[author]]
-initials="S."
-surname="Nandakumar"
-fullname="Suhas Nandakumar"
-organization = "Cisco"
-  [author.address]
-  email = "snandaku@cisco.com"
+stand_alone: yes
+pi: [toc, sortrefs, symrefs]
 
-[[author]]
-initials="C."
-surname="Huitema"
-fullname="Christian Huitema"
-organization = "Private Octopus Inc."
-  [author.address]
-  email = "huitema@huitema.net"
+author:
+-
+  ins: S. Nandakumar
+  name: Suhas Nandakumar
+  org: Cisco
+  email: snandaku@cisco.com
+-
+   ins: C. Huitema
+   name: Christian Huitema
+   org: Private Octopus Inc.
+   email: huitema@huitema.net
 
 --- abstract
 
@@ -966,9 +964,6 @@ Similarly, below example shows an Interactive media session
                                  sub:acme.com/meetings/m123/alice/video
                                  sub:acme.com/meetings/m123/bob/audio
                                  sub:acme.com/meetings/m123/bob/video
-
-
--------+-------+-------+-------+-------+-------+-------+-------+-------+
 ~~~~
 
 The above picture shows as sample media delivery, where
