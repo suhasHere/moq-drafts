@@ -93,55 +93,68 @@ client to a different relay.
 
 # Terminology
 
-* Provider server: Component managing/authoring the track Ids scoped under a
-  domain for a specific application and is responsible for establishing
-  trust between clients and relays for delivering media.
+* Provider/Origin: Entity capable of hosting media application
+  session based on the MoQTransport. It is responsible for
+  authorizing the publishers/subscribers, managing the names
+  used for Tracks and is scoped under domain for a specific
+  application. In certain deployments, a provider is also
+  responsible for establishing trust between clients and
+  relays for delivering media.
+
+* Emitter: Authorized entities that participate in a MoQTransport
+  Session under an Provider. Emitters are trusted with E2E encryption
+  keys for the media and operate on one or more
+  Source Streams (Section 2.1.5 of [!@RFC7656]). They perform media
+  encoding transform, thus transforming a given source stream into
+  one or more representations, usually more compact, known as
+  Encoded Streams (Section 2.1.7 of [!RFC7656]). They further transform
+  the encoded stream into Encrypted Stream. Each such encoded and/or
+  encrpyted stream corresponds to a Track within the MoQ transport protocol.
+
 
 * Control Stream: QUIC Stream to exchange control
-  message to setup appropriate context for media delivery and is scoped
-  to a given QUIC Connection. Functionally, Control Messages enable authorization
-  of names, setting up media properties and starting/terminating
+  message to setup appropriate context for media delivery
+  and is scoped to a given QUIC Connection. Functionally,
+  Control Messages enable authorization of names for tracks,
+  setting up media properties and starting/terminating
   media sessions.
 
-* Data Stream: QUIC Stream or QUIC Datagram based transport for
-  delivering end to end encrypted application media objects. Such objects
-  shall carry metadata (unencrypted) for Relays to make store/forwarding
-  decisions along with the application payload.
-
-* Provider: A provider is an entity which is capable of providing persistent group chat capabilities
-  to a set of users that have signed up to their service. A provider offers its users both a client application and a backend cloud service that powers its client application. A provider is also capable of authenticating its users.
-
+* Data Stream: QUIC Stream based transport for delivering
+  end to end encrypted application media objects. Such objects
+  shall carry metadata (unencrypted) for Relays to make
+  store/forwarding decisions along with the application payload.
 
 
 # Object Model
 
-This section define various concepts that make up
-object model enabling media delivery over QUIC.
+This section define various concepts that make up the object model
+enabling media delivery over QUIC.
 
 ## Tracks {#tracks}
 
 Tracks form the central concept within the MoQ Transport
 protocol for delivering media. A Track identifies the namespace
-under which MoQ Media objects ((#objects)) are delivered.
+and the authorization scope under which MoQ Media objects
+((#objects)) are delivered.
 
-A track is a transform of a Source Media Stream (RFC7656) using a
+A track is a transform of a Source Media Stream [@!RFC7656] using a
 specific encoding process, a set of parameters for
 that encoding, and possibly an encryption process.
-The MoQ transport is designed to transport tracks.
+The MoQTransport is designed to transport tracks.
 
 Tracks have the following properties:
 
-* Tracks MUST be owned by a single provider domain and sourced
-  from a single Emitter within the owning provider domain.
+* Tracks MUST be owned by a single authorized MoQ Entity, such as
+  an Emitter or a Catalog Maker, under a single provider domain.
 
-* Tracks MUST have a single encoding and decoding configuration.
+* Tracks MUST have a single encoding configuration.
 
 * Tracks MUST have a single security configuration.
 
 Tracks are identified by a globally unique identifier,
-called Track ID. Track ID MUST identify its owning provider
+called "Track ID". Track ID MUST identify its owning provider
 by a standardized identifier, such as domain name or equivalent,
-then followed by the application context specific track name.
+then followed by the application context specific "Track Name".
 
 
 ## Objects {#objects}
@@ -149,23 +162,25 @@ then followed by the application context specific track name.
 The binary content of a track is composed of a sequence
 of objects. An Object is the smallest unit that makes
 sense to decode and may not be independently decodable.
-Object MUST belong to a group ((#groups))
+An Object MUST belong to a group ((#groups))
 
-Few examples, for video media an object could be an H.264
-P frame or could be just a single slice from inside the
-P Frame. For audio media, it could be a audio frame.
+Few examples include, for video media an object could
+be an H.264 P frame or could be just a single slice from
+inside the P Frame. For audio media, it could be a
+single audio frame.
 
 Objects are not partially decodable. The end to end
-encryption and authentication ooperations are performed
+encryption and authentication operations are performed
 across the whole object, thus rendering partial objects
-shall not be possible.
+unusable.
 
 Objects MUST be uniquely identifiable within the
 MoQ delivery system. Objects carry associated header/metadata
-containining priority/delivery order, time to live, and
+containining priority, time to live, and
 other information aiding the caching/forwarding decision at
 the Relays. Objects MAY be optionally cached at Relays.
-Payload of objects are opaque to Relays.
+The content of the Objects are opaque to Relays and delivered
+on the strict priority order ((#priority))
 
 
 ## Object Groups {#groups}
@@ -174,38 +189,33 @@ An Object MUST belong to a group. Groups are composition of
 objects and they carry the necessary dependecy information
 needed to process the objects in the group. Objects that
 carry information required to resolve dependecies are
-marked appropriately in their headers. In cases where such information MAY NOT be available, the first object in the group MUST have all the dependency information needed to processs the
-rest of the objects.
+marked appropriately in their headers. In cases where such
+information MAY NOT be available, the first object in the
+group MUST have all the dependency information needed to
+processs therest of the objects.
 
-A group shall provide following utilities:
+A group shall provide following utilities
 
-* Subscribers to specifiy the appropriate consumption point
+* A way for subscribers to specifiy the appropriate consumption point
   for enabling joins, rewinds and replay the objects, for
-  certain video media usecases.
+  certain media usecases.
 
-* Specify refresh points serving as decode points, switching
-  between qualties for audio/video media
+* A way to specify refresh points within a group, serving as decode
+  points, points of switching between qualties for audio/video media
 
 * Serve as checkpoint for relays to implement appropriate
     congestion responses.
 
 
-## Track Bundle
-
-Tracks can be bundled together to satisy certain application
-requirements
-
-### Scalable Codecs and relation to the tracks
-
-
 # Concepts
 
-## Emitter and Emission {#emission}
+## Emission {#emission}
 
 An Emission represents a collection of tracks sourced by an
-Emitter and owned by an application Provider.
-An Emitter MUST be authorized to publish objects of the
-tracks in a Emission. An Emitter can have one or more emissions.
+emission source (Emitter or Catalog Maker) and owned by an
+application Provider. An Emitter MUST be authorized to publish
+objects of the tracks in a Emission. An Emitter can have one
+or more emissions.
 
 Few example of Emissions include,
 
@@ -219,12 +229,20 @@ Few example of Emissions include,
 
 ## Catalog {#catalog}
 
-Catalog is a MOQ object scoped to a MoQ Session ((#session)) that provides information about tracks from one of more Emissions and is used by the subscribers for consuming tracks.
+Catalog is a MOQ Object scoped to a MoQSession ((#session)) that
+provides information about tracks from one of more Emissions and
+is used by the subscribers for consuming tracks and for publishers
+to advertise the tracks. The content of "Catalog" is opaque to the
+Relays and may be end to end encrypted in certain scenarios.
 
 
 ## MoQ Session {#session}
 
-A MoQ Session is a top level container under an application Provider that represetns one or more emitters, their tracks, optionally a set of participating relays, and set of receviers that are interested in the content being published.
+A MoQ Session is a top level container under an application Provider
+that represents one or more emissions, optionally a set of
+participating relays, and set of publisher publishing content
+and subscribers that are interested in consuming the content being
+published.
 
 # Protocol Design {#protocol}
 
@@ -265,19 +283,10 @@ The length is encoded as a 16 bit number in big endian network order.
 Below sub-sections define various control messages defined in
 this specification.
 
-### Catalog Message {#catalog}
-
-```
-catalog {
-  message_type(i),
-  catalog_legnth(i),
-  catalog(...)
-}
-```
 
 ### Subscribe Message {#subscribe}
 
-Entities that intend to receive media  will do so via
+Entities that intend to receive media will do so via
 subscriptions to one or more Tracks.
 
 ```
@@ -301,10 +310,8 @@ subscribe_message {
 }
 ```
 
-TODO: Add authz information
-
-The message type will be set to SUBSCRIBE. `tracks` identifies the
-list of tracks as defined in `track_info` type.
+The message type will be set to SUBSCRIBE (1). `tracks` identifies the
+list of tracks as defined by the `track_info` type.
 
 The `track_id` captures the Track ID and the `intent` field specifies
 the intended consumption point.
@@ -333,25 +340,20 @@ stream and the same is closed when the subscriptions for
 the tracks includes are no longer required. This implies
 the termination of all associated data streams.
 
-
-TODO Add the flexibility on using one track per subscribe vs multiple
-
-TODO: provide more details on authorization flows.
-
 #### Aggregating Subscriptions
 
 Subscriptions are aggregated at entities that perform Relay Function.
 Aggregating subscriptions helps reduce the number of subscriptions
 for a given track in transit and also enables efficient
 distribution of published media with minimal copies between the
-client and the origin server/ or other relays, as well as reduce the
-latencies when there are multiple subscribers for a given namespace
-object behind a given cloud server.
+client and other relays, as well as reduce the
+latencies when there are multiple subscribers for a given track
+behind a Relay or the provider.
 
 
-### SUBSCRIBE_REPLY Message
+### SUBSCRIBE_REPLY Message {#subscribe-reply}
 
-A `subscribe_reply` provides result of the subscription and is sent
+A `subscribe_reply` provides results of the subscription and is sent
 on the control stream over which the `subscribe` control message was received.
 
 ```
@@ -363,9 +365,9 @@ enum response
 }
 
 track_response {
+  Response response,
   track_id_length(i),
   track_id(...)...,
-  Response response,
   [Reason Phrase Length (i)],
   [Reason Phrase (...)],
   [media_id(i)]
@@ -378,16 +380,16 @@ subscribe_reply
 }
 ```
 
-`tracks` capture the result of subscription per track included
-in the `subscribe` message.
+The message type will be set to SUBSCRIBE\_REPLY (2). `tracks` capture
+the result of subscription per track included in the `subscribe` message.
 
 For each track, the `track_response` provides result of
-subscripion in `response` field, where a response of `ok`
-indicates successful subscription, for `failed`
-or `expired` responses and "Reason Phrase" shall be populated
-with appropriate reason.
+subscription in the `response` field, where a response of `ok`
+indicates successful subscription. For `failed`
+or `expired` responses, the "Reason Phrase" shall be populated
+with appropriate reason code.
 
-The `media_id` for a given track is populted for a successful
+The `media_id` for a given track is populated for a successful
 subscription and represents an handle to the subscription to be
 provided by the peer over the data streams(s). Given that the
 media corresponding to a track can potentially arrive over
@@ -397,18 +399,15 @@ It also serves as compression identifier for containing the size
 of object headers instead of carrying complete track identifier
 information in every object message.
 
-
 While the subscription is active for a given name, the Relay(s)
-must send objects for tracks it receives to all the matching subscribers.
+must send objects for tracks it receives to all the matching
+subscribers. Optionally, a client can refresh its subscriptions at
+any point by sending a new `subscribe_message`.
 
-Optionally, a client can refresh its subscriptions at any point
-by sending a new `subscribe_message`.
-
-### PUBLISH REQUEST Message.
+### PUBLISH REQUEST Message {#publish_req}
 
 The `publish_request` message provides one or more
-Tracks that the publisher intends to publish data.
-
+tracks that the publisher intends to publish data.
 
 ```
 
@@ -424,9 +423,15 @@ publish_request {
 }
 ```
 
-TODO: Add authz details
-
-The message type will be set to PUBLISH\_REQUEST (6). `tracks` identifies the list of tracks. The `media_id` represents an handle to the track to be used over the data streams(s). Given that media corresponding to the track can potentially be sent over multiple data streams, the `media_id` provides the necessary mapping between the control stream and the associated data streams. `media_id` also serves as compression identifier for containing the size of object headers instead of carrying full formed Track Id in every object.
+The message type will be set to PUBLISH\_REQUEST (3).
+`tracks` identifies the list of tracks. The `media_id` represents
+an handle to the track to be used over the data streams(s). Given
+that media corresponding to the track can potentially be sent over
+multiple data streams, the `media_id` provides the necessary
+mapping between the control stream and the associated data streams.
+`media_id` also serves as compression identifier for containing
+the size of object headers instead of carrying full formed
+Track Id in every object.
 
 The `publish_request` message is sent on its own control stream and
 akin to subscribes, the control stream's lifecycle bounds
@@ -434,47 +439,27 @@ the media transfer state. Terminating the control stream implies
 closing of all the associated data streams for the tracks included
 in the request.
 
-
 ### PUBLISH_REPLY Message.
 
-`publish_reply` provides the result of intent to publish
+`publish_reply` provides the result of request to publish
 on the track(s) in the `publish_request`. The `publish_reply`
 control message is sent over the same control stream the
 request was received on.
 
 ```
-track_response {
-  track_id_length(i),
-  track_id(...)...,
-  Response response,
-  [Reason Phrase Length (i)],
-  [Reason Phrase (...)],
-}
-
-
 publish_reply {
   message_type(i),
   track_response tracks(...),
 }
 ```
 
-
-The message id is set to PUBLISH\_REPLY (7).
+The message_type is set to PUBLISH\_REPLY (4).
 
 `tracks` capture the result of publish request per track included
-in the `publish_request` message.
-
-For each track, the `track_response` provides result of
-subscripion in `response` field, where a response of `ok`
-indicates successful subscription, for `failed`
-or `expired` responses and "Reason Phrase" shall be populated
-with appropriate reason.
-
-While the publishing objects is active for a given track, the Relay(s)
-MUST send objects for tracks it receives to all the matching subscribers.
-
-
-#### Implementation Note
+in the `publish_request` message. The semantics of `track_response`
+is same as defined in ((#subscribe-reply)) except the `media_id`
+is optionally populated in the case where the `media_id` in the
+request cannot be used.
 
 ### RELAY_REDIRECT MESSAGE
 
@@ -488,31 +473,58 @@ relay_redirect
 {
   message_type(i),
   relay_address_length(i),
-  relay_address(...)
+  relay_address(...)...
 }
 ```
 
+The message_type is set to RELAY\_REDIRECT (5). `relay_address`
+identifies the address of the relay to setup the new subscriptions
+or publishes to.
+
+### Catalog Message {#catalog}
+
+TODO Add details
+
+```
+catalog {
+  message_type(i),
+  catalog_length(i),
+  data(...)...
+}
+```
+
+The message_type is set to CATALOG (6).
+
 ## Data Stream and Messages {#data}
+
+This section provide details on encoding of application
+data for publishing over one or more data streams.
 
 ### Group Header
 
-The first message on each Warp header is encoded as:
+The first message on each group is a header message is encoded as:
+
 ```
-group_header_message {
+group_header {
   message_type(i),
   media_id(i),
   group_id(i)
 }
 ```
-The message type is set to GROUP_HEADER, 12.
+
+The message type is set to GROUP_HEADER, 11. `media_id` MUST correspond
+to the one that was setup as part of `publish_request` control
+message exchage ((#publish_req)). `group_id` always starts at 0 and
+increases sequentially at the original media publisher.
 
 
 ### Object header
 
 Each object in the stream is encoded as an Object header, followed by
 the content of the object. The Object header is encoded as:
+
 ```
-quicrq_object_header_message {
+object_header {
   message_type(i),
   object_id(i),
   [nb_objects_previous_group(i),]
@@ -520,14 +532,17 @@ quicrq_object_header_message {
   object_length(i)
 }
 ```
+The message type is set to OBJECT_HEADER, 12. `object_id` is identified
+by a sequentially increasing integer, starting at 0.
+
 
 ### Fragment Message
 
-The Fragment message is used to convey the content of a media stream as a series
+The Fragment message is used to convey the content of a object as a series
 of fragments:
 
 ```
-quicrq_fragment_message {
+fragment {
   message_type(i),
   [media_id(i)],
   [group_id(i)],
@@ -539,9 +554,15 @@ quicrq_fragment_message {
 }
 ```
 
-The message type will be set to FRAGMENT (5).
+The message type will be set to FRAGMENT (13). The optional fields
+`media_id`, `group_id` and `object_id` are provided in the cases
+where they can be obtained from the context where the `fragment`
+message is published. For typical cases, the `group_header`
+and the `object_header` messages preceed the series of `fragment`
+messages and thus provide the necessary context to tie the
+`data` to the object.
 
-The offset value indicates where the fragment
+The fragment_offset value indicates where the fragment
 data starts in the object designated by `group_id` and `object_id`.
 Successive messages are sent in order, which means one of the
 following three conditions must be verified:
@@ -587,12 +608,7 @@ Sending a placeholder allows node to differentiate between a
 temporary packet loss, which will be soon corrected, and a
 deliberate object drop.
 
-## Sending objects over streams considerations {#stream-considerations}
-
-This section is non-normative and provided for
-Applications can choose to define the mapping of the Objects onto
-the Data Streams, as they see fit as driven by the use-case
-requirements.
+## Stream Considerations {#stream-considerations}
 
 Certain applications can choose to send each group in their own
 unidirectional QUIC stream. In such cases, stream will start with
@@ -628,7 +644,7 @@ The MOQTransport doesn't enforce a rule to follow for the applications,
 but instead aims to provide tools for the applications to make
 the choices appropriate for their use-cases.
 
-# Priority
+# Priority {#priority}
 
 In case of congestion, the MoQ nodes may have to drop some traffic in
 order to avoid building large queues. The drop algorithm must respect
@@ -738,64 +754,204 @@ in order to match the desired user experience. When using scalable video codecs,
 this could mean for example chosing between "frame rate first" or "definition
 first" priorities, or some compromise.
 
-# Relay Function and Relays {#relay_behavior}
+# Relays {#relays-moq}
 
-The Relays receive subscriptions and intent to publish request and
-optionaly forward them towards the origin for authorization. Subscriptions
-received are aggregated. When a relay receives a publish request with
-data, it will forward it both towards the Origin and to any clients
-or relays that have a matching subscription. This "short circuit" of
-distribution by a relay before the data has even reached the
-Origin servers provides significant latency reduction for nearby client.
-Relays MAY cache some of the information for short period of time and
-the time cached may depend on the Origin. The Relay keeps an outgoing
-queue of objects to be sent to the each subscriber and objects are sent
-in priority order.
+The Relays play an important role for enabling low latency media delivery within the MoQ architecture. This specification allows for a delivery protocol based on a publish/subscribe metaphor where some endpoints, called publishers, publish media objects and
+some endpoints, called subscribers, consume those media objects. Some relays can leverage this publish/subscribe metaphor to form an overlay delivery network similar/in-parallel to what CDN provides today. While this type of overlay is expected to be a major application of relays, other types of relays can also be defined to offer various types of services.
+
+Objects are received by "subscribing" to it. Objects are identified such that it is unique for
+the relay/delivery network.
+
+Relays provide several benefits including
+
+* Scalability – Relays provide the fan-out necessary to scale up
+                streams to production levels (millions) of concurrent
+                subscribers.
+
+* Reliability - relays can improve the overall reliability
+               of the delivery system by providing alternate paths for
+               routing content.
+
+* Performance – Relays are usually positioned as close to the edge of a
+                network as possible and are well-connected to each other
+                and to the Origin via high capacity managed networks. This
+                topography minimizes the RTT over the unmanaged last
+                mile to the end-user, improving the latency and throughput
+                compared to the client connecting directly to the origin.'
+
+* Security –    Relays act to shield the origin from DDOS and other
+                malicious attacks.
+
+## Relay - Subscriber Interactions
+
+Subscribers interact with the "Relays" by sending a "subscribe" ((#subscribe)) command
+for the tracks of interest.
+
+Relays MUST be willing to act on behalf of the subscriptions before they can forward
+the media, which implies that the subscriptions MUST to be authorized and it is
+done as follows:
+
+1. Provider serving the tracks MUST be authorized. Track IDs provide the necessary
+   information to identify the Origin/Provider.
+
+2. Subscriptions MUST be authorized. This is typically done by either subscriptions
+   carrying enough authorization information or subscriptions being forwarded
+   to the Origin for obtaining authorization. The mechanics of either of these
+   approaches are out of scope for this specification.
 
 
-At a high level, Relay Function within QuicR architecture support store and
-forward behavior. Relay function can be realized in any component of the
-QuicR architecture depending on the application. Typical use-cases might
-require the intermediate servers (caches) and the origin server to implement
-the relay function. However the endpoint themselves can implement the Relay
-function in a Isomorphic deployment, if needed.
+In all the scenarios, the end-point client making the subscribe request is
+notified of the result of the subscription.
 
-The relays are capable of receiving data in stream mode or in datagram mode.
-In both modes, relays will cache and deliver fragments as they arrive.
+## Relay - Publisher Interactions
+
+Publishers MAY be configured to publish the objects to a relays based on
+the application configuration and topology. Publishing set of tracks through
+the relay starts with a "publish_request" transaction that describes the
+track identifiers. That transaction will have to be authorized by the Origin,
+using mechanisms similar to authorizing subscriptions.
+
+As specified with subscriber interactions, Relays MUST be authorized
+to serve the provider and the `publish_request` MUST be authorized before
+the Relays are willing to forward the published data for the tracks.
+
+Relays makes use of priority order and other metadata properties from
+the published objects to make forward or drop decisions when reacting to
+congestion as indicated by the underlying QUIC stack.
+The same can be used to make caching decisions.
+
+## Relay Discovery and Failover
+
+Relays are discovered via application defined ways that are out of scope of this
+document. A Relay that wants to shutdown can send a message to the client with
+the address of new relay. Client moves to the new relay with all of its
+Subscriptions and then Client unsubscribes from old relay and closes connection to it.
+
+## Restoring connections through relays
+
+The transmission of a track can be interrupted by various events, such as
+loss of connectivity between subscriber and relay. Once connectivity is
+restored, the subscriber will want to resume reception, ideally with as
+few visible gaps in the transmission as possible, and certainly without
+having to "replay" media that was already presented.
+
+There is no guarantee that the restored connectivity will have the same
+characteristics as the previous instance. The throughput might be lower,
+forcing the subscriber to select a media track with lower definition.
+The network addresses might be different, with the subscriber connecting to a
+different relay.
+
+
+## Examples
+
+Let’s consider the example as show in the picture below, where a large number of
+subscribers are interested in media streams from the publisher Alice. In this scenario,
+the publisher Alice has a live brodcast on channel8 with video streams at 3
+different quality (HD, 4K and SD)
+
+More specifically,
+
+1. Subscriber - S1 is interested in the just the low quality version of the
+   media, and asks for the all the media groups/objects under the specific
+   representation for "sd" quality.
+
+2. Subscriber - S2 is fine with receiving highest quality video streams
+   published by Alice, hence asks for the all the media objects under
+   these representations 4k.
+
+3. Rest of the Subscribers (say Sn,…) are fine with getting just the Hi-def
+   and low quality streams of the video from Alice, and asks for the representaions
+   "sd" and "hd" qualities.
+
+The Relay must forward all these subscription requests to the ingest
+server in order to receive the content.
+
+Note: The notation for identifying the resources for subscription are for
+      illustration purposes only.
+
+~~~~
+
+                                                      sub: acme.tv/brodcasts/channel8/alice/sd
+                                                               ─────.
+                                                      ┌──────(  S1   )
+                                                      │       `─────'
+                                                      │
+         sub: acme.tv/broadcasts/channel8/alice/4k    |
+         sub: acme.tv/brodcasts/channel8/alice/sd     |
+         sub: acme.tv/brodcasts/channel8/alice/hd     |
+            │                                         |
+┌──────────────┐                ┌──────────────┐      │
+│              │                │              │      │  sub: acme.tv/brodcasts/channel8/alice/4k
+|              |                |              |      |
+│   Ingest     │ ◀──────────────┤  Relay-Edge  │◀─────┘       .─────.
+│              │                │              │◀────────────(  S2   )
+└──────▲───────┘                └──────────────┘◀─────┐       `─────'
+       │                                              │          ◉
+       │                                              │          ◉
+    .─────.                                           │          ◉
+   ( Alice )                                          │
+    `─────'                                           │        .─────.
+                                                      └───────(  SN   )
+pub: acme.tv/broadcasts/channel8/alice/hd                      `─────'
+pub: acme.tv/broadcasts/channel8/alice/sd
+pub: acme.tv/broadcasts/channel8/alice/4k            sub: acme.tv/brodcasts/channel8/alice/sd
+                                                     sub: acme.tv/brodcasts/channel8/alice/hd
+
+~~~~
+
+The relay does not intercept and parse the CATALOG messages, therefore
+it does not know the entireity of the content being produced by Alice. It
+simply aggregates and forwards all subscription requests that it receives.
+
+Similarly, below example shows an Interactive media session
+
+~~~~
+  pub: acme.com/meetings/m123/bob/video
+  pub: acme.com/meetings/m123/bob/audio
+
+              .─────.     sub:acme.com/meetings/m123/alice/audio
+             (  Bob  )
+              `─────'     sub:acme.com/meetings/m123/alice/video
+                 │
+                 │        sub:acme.com/meetings/m123/bob/audio
+                 │
+                 │        sub:acme.com/meetings/m123/bob/video
+                 │
+          ┌──────▼───────┐                ┌──────────────┐
+          │              │                │              │
+          │    Relay     │ ◀──────────────┤    Relay     │◀─────|
+          │              │                │              │      |
+          └──────▲───────┘                └──────────────┘      |
+                 │                                              │
+                 │                                              │
+                 │                                              │
+                 │                                              │
+              .─────.                                           │
+             ( Alice )                                          │
+              `─────'                                           │        .─────.
+                                                                └───────(  S1   )
+     pub: acme.com/meetings/m123/alice/video                             `─────'
+     pub: acme.com/meetings/m123/alice/audio
+                                                        sub:acme.com/meetings/m123/alice/audio
+                                                        sub:acme.com/meetings/m123/alice/video
+                                                        sub:acme.com/meetings/m123/bob/audio
+                                                        sub:acme.com/meetings/m123/bob/video
+
+~~~~
+
+The above picture shows as sample media delivery, where
+a tree topography is formed with multiple relays in the network.
+The example  has 4 participants with Alice and Bob
+being the publishers and S1  being the subscribers.
+Both Alice and Bob are capable of publishing audio and video
+identified by their appropriate names. S1 subscribes
+to all the streams being published. The edge Relay
+forwards the unique subscriptions to the downstream Relays
+as needed, to setup the delivery network.
 
 
 
-## Relay or Cache or  Drop Decisions
-
-Relays makes use of priority, time-to-live, is_discardable metadata properties
-from the published data to make forward or drop decisions when reacting to
-congestion as indicated by the underlying QUIC stack. The same can be used to
-make caching decisions.
-
-## Cache cleanup
-
-Relays store objects no more than `best_before` time associated with the
-object. Congestion/Rate control feedback can further influence what
-gets cached based on the relative priority and rate at which data
-can be delivered. Local cache policies can also limit the amount and
-duration of data that can be cached.
-
-
-## Relay fail over
-
-A relay that wants to shutdown shall use the redirect message to move traffic
-to a new relay. If a relay has failed and restarted or been load balanced
-to a different relay, the client will need to resubscribe to the new relay
-after setting up the connection.
-
-TODO: Cluster so high reliable relays should share subscription info and
-publication to minimize of loss of data during a full over.
-
-## Relay Discovery
-
-TODO
-
-# Usages
+# Transport Usages
 
 Following subsections define usages of the MoQTransport over
 WebTransport and over raw QUIC.
@@ -803,55 +959,54 @@ WebTransport and over raw QUIC.
 ## WebTransport
 
 WebTransport provides protocol framework that enables clients constrained
-by the Web security model to communicate with a remote server using a secure multiplexed transport. WebTransport protocol also provides support for unidirectional streams, bidirectional streams and datagrams, all multiplexed within the same HTTP/3 connection.
+by the Web security model to communicate with a remote server using a
+secure multiplexed transport. WebTransport protocol also provides
+support for unidirectional streams, bidirectional streams and
+datagrams, all multiplexed within the same HTTP/3 connection.
 
-MoqTransport uses WebTransport over HTTP/3 transport.
+MoqTransport uses WebTransport over HTTP/3.
 
 
 ### Setup
 
 Clients (publishers and subscribers) setup WebTransport Session
-via HTTP CONNECT request to the application provided MoQSession and
+via HTTP CONNECT request for the application provided MoQSession and
 provide the necessary authentication information
-(in the form of authentication token) to securely connect to
-the server. In case of any errors, the session is terminated and
-reported to the application.
-
-
-### Subscribers
-
-On a successful connection, subscribers proceed by retrieving the
-catalog (if not already retrieved), subscribing to the tracks of
-thier interest and consuming the data published as detailed below.
+(in the form of authentication token). In case of any errors,
+the session is terminated and reported to the application.
 
 ### Catalog Retrieval
+
+On a successful connection setup, subscribers proceed by retrieving the
+catalog (if not already retrieved), subscribing to the tracks of
+their interest and consuming the data published as detailed below.
 
 Catalog provides the details of tracks such as Track IDs and corresponding
 configuration details (audio/video codec detail, gamestate encoding details,
 for example).
 
-Catalogs are identifed as a special track, with the track name as "catalog".
-Catalog objects are retrived by subscribing to its TrackID over
+Catalogs are identifed as a special track, with its track name as "catalog".
+Catalog objects are retrieved by subscribing to its TrackID over
 its own control channel and the TrackID is formed as shown below
 
 ```
-Catalog TrackID := <provider-domain>/<emission-id>/catalog
+Catalog TrackID := <provider-domain>/<moq-session-id>/catalog
 
 Ex: streaming.com/emission123/catalog
 ```
 
-A successful subscription will lead to one or more catalog
-objects being published on a single unidirectional data stream,
-identified by its `media_id`. Successful subscriptions implies
-authorizaiton for subscrbing to the tracks in the catalog.
+A successfull subscription will lead to one or more catalog
+objects being published on a single unidirectional data stream.
+Successfull subscriptions implies authorizaiton for subscribing
+to the tracks in the catalog.
 
 Unsuccessful subscriptions MUST result in closure of the
 WebTransport session, followed by reporting the error obtained
 to the application.
 
 Catalog Objects obtained MUST parse successfully, otherwise
-MUST be treated as error, thus resulting the closure of the WebTransport
-session.
+MUST be treated as error, thus resulting the closure of the
+WebTransport session.
 
 ### Subscribing to Media
 
@@ -861,8 +1016,8 @@ can choose to use the same WebTransport session or multiple of
 them to perform the track subscriptions based on the application
 requirements.
 
-Tracks subscription by sending `subscribe` message as defined
-in ((#subscribe))
+Tracks subscription is done by sending `subscribe` message
+as definedin ((#subscribe))
 
 On successful subscription, subscribers should be ready to
 consume media on one or more Data Streams as identified by their
@@ -872,54 +1027,17 @@ Failure to subscribe MUST result on closure of the control stream
 associated with the track whose subscription failed and the error MUST
 be reported to the application.
 
-## Publishers
-
-On a successful connection and authorization, publishers
-publish their catalog
-and on successful authorization, proceed with publish objects.
-
-### Publishing Catalog
-
-Catalogs are identifed as a special track, with the track name
-as "catalog". Catalog objects are published by sending a
-`catalog` message on its own control channel and the TrackID
-is formed as shown below
-
-```
-Catalog TrackID := <provider-domain>/<moq-session-id>/catalog
-
-Ex: streaming.com/session123/catalog
-```
-
-A successful publishing will authorize the publisher to
-the publish objects for tracks listed in the catalog.
-
-Unsuccessful `catalog`  MUST result in closure of the
-WebTransport session, followed by reporting the error
-obtained to the application.
-
-Note that applications MAY choose to get the initial
-catalog from out of band mechanisms that is out of scope
-for this specification.
 
 ### Publishing Media
 
-Once a catalog is successfully authorized,
-send `publish_request` message listing the tracks
-they intend to publish. A sucessfull `publish_reply`
-allows publishers to publish on the tracks. This
-exchange of `publish_request` enables Relays to be
-aware of tracks to expect publishes on and thus
-explicitly signal the willingness to participate
-in the media delivery for the advertised tracks.
-This is due to the fact that, catalog messages are
-opaque to Relays and `publish_request` will ensure
-the appropriate authorization. For the scenarios,
-where the initial catalog message is obtained
-out of band, the exchange of `publish_request`
-is important to setup neeede authorization for
-publishes.
+On successful setup of the WebTranport session,
+publishers send `publish_request` message listing the tracks
+they intend to publish data on. Publisher MUST be
+authorized to publish on the tracks and Relays MUST
+be willing to participate in the media delivery.
 
+A sucessfull `publish_reply` allows publishers to publish
+on the tracks advertised.
 
 
 Publishing objects on the tracks follow the procedures
@@ -936,9 +1054,45 @@ TODO Fill this section.
 
 {backmatter}
 
+# TODO
+
+1. Add authorization details for the protocol messages.
+
+# Security Considerations
+
+This section needs more work
+
+# IANA Considerations {#iana}
+
+This specification doesn't propose any changes to IANA.
+
+# References
+
+## Normative References
+
+  [RFC XXX]   Nandakumar, S "MoQ Base Protocol"
+              Work in progress
+
+  [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+             Requirement Levels", BCP 14, RFC 2119,
+             DOI 10.17487/RFC2119, March 1997,
+             <https://www.rfc-editor.org/info/rfc2119>.
+
+## Informative references
+
+  [RFC8126]  Cotton, M., Leiba, B., and T. Narten, "Guidelines for
+             Writing an IANA Considerations Section in RFCs", BCP 26,
+             RFC 8126, DOI 10.17487/RFC8126, June 2017,
+             <https://www.rfc-editor.org/info/rfc8126>.
+
+  [QUIC]    Iyengar, J., Ed. and M. Thomson, Ed., "QUIC: A UDP-Based Multiplexed and Secure Transport",
+            RFC 9000, DOI 10.17487/RFC9000, May 2021,
+            <https://www.rfc-editor.org/rfc/rfc9000>.
+
+  [WebTransport]    Frindell, A., Kinnear, E., and V. Vasiliev, "WebTransport over HTTP/3",
+                    Work in Progress, Internet-Draft, draft-ietf-webtrans-http3-04, 24 January 2023,
+                    <https://datatracker.ietf.org/doc/html/draft-ietf-webtrans-http3-04>.
 
 # Acknowledgments
 
-Thanks to Cullen Jennings, Mo Zanaty for contributions and suggestions to this
-specification.
-
+Cullen Jennings, the IETF MoQ mailing lists and discussion groups.
