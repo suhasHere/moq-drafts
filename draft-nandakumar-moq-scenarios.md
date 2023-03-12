@@ -25,7 +25,12 @@ author:
    name: Christian Huitema
    org: Private Octopus Inc.
    email: huitema@huitema.net
-
+-
+   ins: C. Jennings
+   name: Cullen Jennings
+   org: Cisco
+   email: fluffy@iii.ca 
+   
 --- abstract
 
 This document delineates a set of key scenarios and details the requirements
@@ -83,7 +88,17 @@ We find that scenarios differs in multiple ways. In the previous sections we det
 
 In the streaming scenarios, there is an important emphasis on resynchronization, characterized by a short distance between "access points". This can be used for features like fast-forward or rewinding, which are common in non-real-time streaming. For real-time streaming experiences such as watching a sport event, frequent access points allow "channel surfers" to quickly join the broadcast and enjoy the experience. The interval between these access points will often be just a few seconds.
 
-In video encoding, each access point is mapped to a fully encoded frame that can be used as reference for the "group of blocks". The encoding of these reference frames is typically much larger than the differential encoding of the following frames. This creates a peak of traffic at the beginning of the group. This peak is much easier to absorb in streaming applications that tolerate higher latencies than interactive video conferences. In practice, real time conferences tend to use much longer groups, resulting in higher compression ratios and smoother bandwidth consumption.
+In video encoding, each access point is mapped to a fully encoded frame
+that can be used as reference for the "group of blocks". The encoding of
+these reference frames is typically much larger than the differential
+encoding of the following frames. This creates a peak of traffic at the
+beginning of the group. This peak is much easier to absorb in streaming
+applications that tolerate higher latencies than interactive video
+conferences. In practice, many real time conferences tend to use much
+longer groups, resulting in higher compression ratios and smoother
+bandwidth consumption along with a way to request the start of a new
+group when needed. Other real time conferences tend to use very short
+groups and just wait for the next group when needed. 
 
 Of course, having longer blocks create other issues. Realtime conferences also need to accomodate the occasional occasional late comer, or the disconnected user who want to resynchronize after a network event. This drives a need for synchronization "between access points". For example, rather than waiting for 30 seconds before connecting, the user might quickly download the "key" frames of the past 30 seconds and replay them in order to "synchronize" the video decoder.
 
@@ -91,7 +106,17 @@ Of course, having longer blocks create other issues. Realtime conferences also n
 
 When streaming is organized as a series of short groups of objects, it is possible to use the groups as units of congestion control. The objects of a single stream or of related streams can be organized by order of delivery, starting with the most important in the group. In case of congestion, when there is not enough bandwidth to send everything, the objects at the "tail" of the transmission order get dropped, and transmission of the next group starts.
 
-These "group oriented" mechanism are effectively making an adaptation decision at the end of each group. The latency of the control loop is the duration of the group, which implies that the target latency will be tied to the duration of the group. But for real time conferencing other priorities drive the group duration to large values such as 30 seconds, which then require making decisions "inside the group", not "at the end of it".
+These "group oriented" mechanism are effectively making an adaptation
+decision at the end of each group. The latency of the control loop is
+the duration of the group, which implies that the target latency will be
+tied to the duration of the group. But for real time conferencing other
+priorities drive the group duration to large values such as 30 seconds,
+which then require making decisions "inside the group", not "at the end
+of it".  The available bandwidth of a home internet connection can
+change rapidly as other users in the home start doing things like
+joining a video call or streaming 4K video. MoQ applications will need
+to be able to adjust to these bandwith changes in much less time than a
+typically video group length 
 
 ## Planning in advance or not {#planning-or-not}
 
@@ -157,6 +182,10 @@ Such linearization requires choices, and the choices should be
 made by the application, based on the user experience requirements of
 the application.
 
+The relays will not understand all the variation of what the media is
+but the applications will need a way to indicate to the relays the
+information they will need to correctly order which data is sent first. 
+
 ## Linear ordering using priorities
 
 As explained in {{planning-or-not}}, if the application can accept a latency
@@ -179,8 +208,9 @@ a preference for frame rate. We can express that policy as follow:
 If the application did instead express a preference for definition, object numbers
 will be assigned in the same way, but the priorities will be different:
 
-* the frame priority will be set to 1 for the 720p 30 fps frame,
-  2 for the 1080p enhancements of the 60 fps frames, and 3 for the 60 fps
+* the frame priority will be set to 1 for the 720p 30 fps I frames and 2
+  for the 720p 30 fps P and B frames,
+  3 and 4 for the 1080p enhancements of the 60 fps frames, and 5 and 6 for the 60 fps
   frames and their enhancements.
 
 Object numbers and priorities will be set by the publisher of the track, and
@@ -193,16 +223,24 @@ will use the priorities to selectively drop the "least important" objects:
 
 * if congestion is noticed, the relay will drop first the lesser priority
   layer. In our example, that would mean the objects marked at
-  priority 3. The relay will drop all objects marked at that priority,
+  priority 6. The relay will drop all objects marked at that priority,
   from the first dropped object to the end of the group.
 
 * if congestion persists despite dropping a first layer, the relay will
   start dropping the next layer, in our example the objects marked at
-  priority 2.
+  priority 5.
 
 * if congestion still persist after dropping all but the highest priority
   layer, the relay will have to close the group, and start relaying
   the next group.
+
+When dropping objects within the same priority: 
+
+* higher object numbers in the same group, which are later in the group,
+  are "less important" and more likely to be dropped than objects in the
+  same group with a lower object number. Objects in a previous group are
+  "less important" than objects in the current group and MAY be dropped
+  ahead of objects in the current group.
 
 The specification above assumes that the relay can detect the onset
 of congestion, and has a way to drop objects. There are several ways to
