@@ -231,25 +231,22 @@ Of course, having longer blocks create other issues. Realtime conferences also n
 
 ## Intervals and congestion
 
-When streaming is organized as a series of short groups of objects, it is possible to use the groups as units of congestion control. The objects of a single stream or of related streams can be organized by order of delivery, starting with the most important in the group. In case of congestion, when there is not enough bandwidth to send everything, the objects at the "tail" of the transmission order get dropped, and transmission of the next group starts.
+It is possible to use groups as units of congestion control. When the
+sending strategy is understoud, the objects in the group can be
+assigned sequence numbers and drop priorities that capture the encoding dependencies,
+such that:
 
-These "group oriented" mechanism are effectively making an adaptation
-decision at the end of each group. The latency of the control loop is
-the duration of the group, which implies that the target latency will be
-tied to the duration of the group. But for real time conferencing other
-priorities drive the group duration to large values such as 30 seconds,
-which then require making decisions "inside the group", not "at the end
-of it".  The available bandwidth of a home internet connection can
-change rapidly as other users in the home start doing things like
-joining a video call or streaming 4K video. MoQ applications will need
-to be able to adjust to these bandwith changes in much less time than a
-typically video group length
+* an object can only have dependencies with other objects in the same group,
+* an object can only have dependencies with other objects with lower sequence numbers,
+* an object can only have dependencies with other objects with lower or equal drop priorities.
 
-## Planning in advance or not {#planning-or-not}
-
-If the entire set of objects to be sent in a group is known at the beginning of a group transmission, it is possible to order these objects according to the "delivery order" that will provide the best experience, instead of merely sending them according to their planned replay time. For example, taking a simple example of a "time based" layering, we would want to first send all the 15 fps frames, then all the 30 fps frames, then all the 60 fps frames. The receiver will get the objects that fit in the available bandwidth, and then render the frames in their natural order, playing the whole group at either 15 fps, 30 fps, or 60fps.
-
-This kind of planning in advance is not possible for real time conferences. If we want to target a latency of 100 or 200 ms, we can buffer at most 6 or maybe 12 frames, certainly not the whole group. The order of transmission will have to be rather close to the order of capture. If the bandwidth is limited, some content will have to be pruned "in real time" rather than waiting the end of the group.
+This simple rules enable real-time congestion control decisions at relays and other nodes.
+The main drawback is that if a packet with a given drop priority is actually dropped,
+all objects with higher sequence numbers and higher or equal drop priorities in the
+same group must be dropped. If the group duration is long, this means that the quality
+of experience may be lowered for a long time after a brief congestion. If the group
+duration is short, this can produce a jarring effect in which the quality
+of experience drops perdiodically at the tail of the group. 
 
 # Unit of grouping tracks
 
@@ -288,8 +285,7 @@ Of course, we could encode these dependencies as properties of the object
 being sent, stating for example that "object 17 can only be decoded if
 objects 16, 11 and 7 are available." However, this approach leads to a lot
 of complexity in relays. We believe that a linear approach is
-preferable, using attributes of objects like delivery order (as discussed
-in {{planning-or-not}} or priorities.
+preferable, using attributes of objects like delivery order or priorities.
 
 ## Application choice for ordering
 
@@ -315,12 +311,7 @@ information they will need to correctly order which data is sent first.
 
 ## Linear ordering using priorities
 
-As explained in {{planning-or-not}}, if the application can accept a latency
-larger than the duration of a group, it is possible to derive from the
-preferences a preferred "delivery order", which then defines the number
-assigned to the object in the group. However, this method cannot be used
-when the latency targets are much lower than the duration of the group.
-For those cases, we propose to use a combination of object number and
+We propose to express dependencies using a combination of object number and
 object priority.
 
 Let's consider our example of an encoding providing both spatial enhancement and
@@ -343,7 +334,7 @@ will be assigned in the same way, but the priorities will be different:
 Object numbers and priorities will be set by the publisher of the track, and
 will not be modified by the relays.
 
-## Replay behavior
+## Relay behavior
 
 In case of congestion, the relay
 will use the priorities to selectively drop the "least important" objects:
@@ -382,42 +373,26 @@ priorities.
 
 Web conferencing systems are used on networks with well over 20% packet
 loss and when this happens, it is often on connections with a relatively
-large round trip time. In these situtation, forward error correction or
-redundant transmitions are used to keep a provide a reasonable user
-experience. This can result in scenarios where audio packets are sent at
-a rate of several hundreds packets per second with a high loss rate.
+large round trip times. In these situtation, forward error correction or
+redundant transmitions are used to provide a reasonable user
+experience. Often video is turned off in. There are multiple machine
+learning based audio codecs in development that targeting a 2 to 3 Kbps
+rate.
 
-When mapping this situation onto QUIC streams two approaches are:
+This can result in scenarios where very small audio objects are sent at
+a rate of several hundreds packets per second with a high network loss
+rate.
 
-1. Map all the audio object to one stream
+# Security and Privacy Considerations
 
-2. Map each audio object to it's own stream
+This document provides an abstract analysis of MoQ scenarios, but does
+not detail any security considerations.
 
-Neither of these works out well. If the first case, the high packet loss
-rate along with medium to large RTT results in significant head of line
-blocking and the end user glass to glass latency gets large resulting in
-a poor user experience. This issue is one of the reasons that redundancy
-and forward error correction techniques are preferred over
-retransmission for recovery in network condition like this.
 
-In the case where each audio object is mapped to it's own QUIC stream, a
-large portion of the streams end up with retransmissions, cancelation,
-or both. This results in a significant amount of addition bandwith usage
-which contributes to more congestion and loss.
+# IANA Considerations
 
-The optimal solution in this case is to use datagrams with a time to
-live on the object so they are discarded if they are can not be
-delivered in time.
+This document makes no request of IANA.
 
-# Security Considerations
-
-This specification doesn't specify any protocol changes, but rather
-provdes an overview and comparisions between streaming and
-interactive architecture.
-
-# IANA Considerations {#iana}
-
-This specification doesn't make any recommendation to IANA
 
 # Acknowledgments
 
