@@ -246,7 +246,7 @@ all objects with higher sequence numbers and higher or equal drop priorities in 
 same group must be dropped. If the group duration is long, this means that the quality
 of experience may be lowered for a long time after a brief congestion. If the group
 duration is short, this can produce a jarring effect in which the quality
-of experience drops perdiodically at the tail of the group. 
+of experience drops perdiodically at the tail of the group.
 
 # Unit of grouping tracks
 
