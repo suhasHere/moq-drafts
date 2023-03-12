@@ -29,8 +29,8 @@ author:
    ins: C. Jennings
    name: Cullen Jennings
    org: Cisco
-   email: fluffy@iii.ca 
-   
+   email: fluffy@iii.ca
+
 --- abstract
 
 This document delineates a set of key scenarios and details the requirements
@@ -98,7 +98,7 @@ conferences. In practice, many real time conferences tend to use much
 longer groups, resulting in higher compression ratios and smoother
 bandwidth consumption along with a way to request the start of a new
 group when needed. Other real time conferences tend to use very short
-groups and just wait for the next group when needed. 
+groups and just wait for the next group when needed.
 
 Of course, having longer blocks create other issues. Realtime conferences also need to accomodate the occasional occasional late comer, or the disconnected user who want to resynchronize after a network event. This drives a need for synchronization "between access points". For example, rather than waiting for 30 seconds before connecting, the user might quickly download the "key" frames of the past 30 seconds and replay them in order to "synchronize" the video decoder.
 
@@ -116,7 +116,7 @@ of it".  The available bandwidth of a home internet connection can
 change rapidly as other users in the home start doing things like
 joining a video call or streaming 4K video. MoQ applications will need
 to be able to adjust to these bandwith changes in much less time than a
-typically video group length 
+typically video group length
 
 ## Planning in advance or not {#planning-or-not}
 
@@ -184,7 +184,7 @@ the application.
 
 The relays will not understand all the variation of what the media is
 but the applications will need a way to indicate to the relays the
-information they will need to correctly order which data is sent first. 
+information they will need to correctly order which data is sent first.
 
 ## Linear ordering using priorities
 
@@ -234,7 +234,7 @@ will use the priorities to selectively drop the "least important" objects:
   layer, the relay will have to close the group, and start relaying
   the next group.
 
-When dropping objects within the same priority: 
+When dropping objects within the same priority:
 
 * higher object numbers in the same group, which are later in the group,
   are "less important" and more likely to be dropped than objects in the
