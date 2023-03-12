@@ -47,11 +47,11 @@ Streaming scenarios typically separate "content ingestion" and "content distribu
 
 ~~~
 live.tw.tv
-OBS Client -> Ingest Server 
+OBS Client -> Ingest Server
   (Emitter)
 
-Distribution Server -> Clients 
-  Catalog that has tracks 
+Distribution Server -> Clients
+  Catalog that has tracks
  Latency = 500ms - 2 seconds
                    (maps to GOP length)
 ~~~
@@ -62,7 +62,7 @@ Conferencing - A
   publishers - Conferencing Server - Subscribers
                 [auth server, media logic]
   ==> similar to combination of 2 examples above
-  Latency - 200ms 
+  Latency - 200ms
 
 Conferencing - B
   publishers - Relays - Subscribers
@@ -70,9 +70,9 @@ Conferencing - B
                 catalog management]
        Multiple emitters in a catalog
        Subscribers subscribe to emitter trackId
-    Track Namespace               
-  Latency - 200ms 
-            boundary by GOP length is not practical 
+    Track Namespace
+  Latency - 200ms
+            boundary by GOP length is not practical
 ~~~
 
 # Scenario differences
@@ -139,7 +139,7 @@ of complexity in relays. We believe that a linear approach is
 preferable, using attributes of objects like delivery order (as discussed
 in {{planning-or-not}} or priorities.
 
-## Application choice for ordering 
+## Application choice for ordering
 
 The conversion from dependency graph to linear ordering is not unique.
 The simple graph in our example could be ordered either "frame rate first"
@@ -184,7 +184,7 @@ will be assigned in the same way, but the priorities will be different:
   frames and their enhancements.
 
 Object numbers and priorities will be set by the publisher of the track, and
-will not be modified by the relays. 
+will not be modified by the relays.
 
 ## Replay behavior
 
