@@ -1,4 +1,4 @@
-%%%
+---
 title = "MoQ Transport (moqt) - Unified Media Delivery Protocol over QUIC"
 abbrev = "moqt"
 ipr= "trust200902"
@@ -28,9 +28,7 @@ organization = "Private Octopus Inc."
   [author.address]
   email = "huitema@huitema.net"
 
-%%%
-
-.# Abstract
+--- abstract
 
 This specification defined MoqTransport (moqt), an unified media
 delivery protocol over QUIC. It aims at supporting multiple application
@@ -42,8 +40,7 @@ data is delivered in the strict priority order. The information subscribed
 to is named such that this forms an overlay information centric network.
 The relays allow for efficient large scale deployments.
 
-
-{mainmatter}
+--- middle
 
 # Introduction
 
@@ -135,7 +132,7 @@ enabling media delivery over QUIC.
 Tracks form the central concept within the MoQ Transport
 protocol for delivering media. A Track identifies the namespace
 and the authorization scope under which MoQ Media objects
-((#objects)) are delivered.
+{objects} are delivered.
 
 A track is a transform of a Source Media Stream [@!RFC7656] using a
 specific encoding process, a set of parameters for
@@ -162,7 +159,7 @@ then followed by the application context specific "Track Name".
 The binary content of a track is composed of a sequence
 of objects. An Object is the smallest unit that makes
 sense to decode and may not be independently decodable.
-An Object MUST belong to a group ((#groups))
+An Object MUST belong to a group {groups}
 
 Few examples include, for video media an object could
 be an H.264 P frame or could be just a single slice from
@@ -180,7 +177,7 @@ containining priority, time to live, and
 other information aiding the caching/forwarding decision at
 the Relays. Objects MAY be optionally cached at Relays.
 The content of the Objects are opaque to Relays and delivered
-on the strict priority order ((#priority))
+on the strict priority order {priority}
 
 
 ## Object Groups {#groups}
@@ -229,7 +226,7 @@ Few example of Emissions include,
 
 ## Catalog {#catalog}
 
-Catalog is a MOQ Object scoped to a MoQSession ((#session)) that
+Catalog is a MOQ Object scoped to a MoQSession {session} that
 provides information about tracks from one of more Emissions and
 is used by the subscribers for consuming tracks and for publishers
 to advertise the tracks. The content of "Catalog" is opaque to the
@@ -410,7 +407,6 @@ The `publish_request` message provides one or more
 tracks that the publisher intends to publish data.
 
 ```
-
 track_info {
   track_id_length(i),
   track_id(...)...,
@@ -457,7 +453,7 @@ The message_type is set to PUBLISH\_REPLY (4).
 
 `tracks` capture the result of publish request per track included
 in the `publish_request` message. The semantics of `track_response`
-is same as defined in ((#subscribe-reply)) except the `media_id`
+is same as defined in {subscribe-reply} except the `media_id`
 is optionally populated in the case where the `media_id` in the
 request cannot be used.
 
@@ -495,14 +491,48 @@ catalog {
 
 The message_type is set to CATALOG (6).
 
-## Data Stream and Messages {#data}
+## Stream Considerations {#stream-considerations}
 
-This section provide details on encoding of application
-data for publishing over one or more data streams.
+Certain applications can choose to send each group in their own
+unidirectional QUIC stream. In such cases, stream will start with
+a "group header" message specifying the media ID and the group ID,
+followed for each object in the group by an "object header"
+specifying the object ID and the object length and then the content
+of the objects (as depicted below)
+
+```
++--------+------------+-------+------------+-------+------
+| Group  | Object     | Bytes | Object     | Bytes |
+| header | header (0) |  (0)  | header (1) |  (1)  | ...
++--------+------------+-------+------------+-------+------
+```
+
+The first object in the stream is object number 0, followed by 1, etc.
+Arrival of objects out of order will be treated as a protocol error.
+
+TODO: this strict "in order" arrival is not verified if there is
+one stream per drop-priority level. Add text to enable that.
+
+Alternatively, certain applications can choose to send each object
+in its own unidirectional QUIC stream. In such cases, each stream
+will start with a "group header" message specifying the
+media ID and the group ID, followed by a single "object header"
+and then the content of the objects (as depicted below).
+
+```
++--------+------------+-------+
+| Group  | Object     | Bytes |
+| header | header (n) |  (n)  |
++--------+------------+-------+
+```
+
+The MOQTransport doesn't enforce a rule to follow for the applications,
+but instead aims to provide tools for the applications to make
+the choices appropriate for their use-cases.
 
 ### Group Header
 
-The first message on each group is a header message is encoded as:
+The group header message is encoded as:
 
 ```
 group_header {
@@ -514,7 +544,7 @@ group_header {
 
 The message type is set to GROUP_HEADER, 11. `media_id` MUST correspond
 to the one that was setup as part of `publish_request` control
-message exchage ((#publish_req)). `group_id` always starts at 0 and
+message exchage {publish_req}. `group_id` always starts at 0 and
 increases sequentially at the original media publisher.
 
 
@@ -535,12 +565,47 @@ object_header {
 The message type is set to OBJECT_HEADER, 12. `object_id` is identified
 by a sequentially increasing integer, starting at 0.
 
+The `nb_objects_previous_group` is present if and only if this is
+the first fragment of the first object in a group, i.e., `object_id`
+and `offset` are both zero. The number indicates how many objects
+were sent in the previous group. It enables the receiver to check
+whether all these objects have been received.
+
+The `flags` field is used to maintain low latency by selectively
+dropping objects in case of congestion. 
+The flags field is encoded as:
+```
+{
+    maybe_dropped(1),
+    drop_priority(7)
+}
+```
+
+## Datagram considerations
+
+MoQ objects can be transmitted as datagrams, if the datagram transmission
+option has been validated during the subscribe or publish transaction.
+
+When sent as datagrams, the object is split into a set of fragments. Each
+fragment is sent as a separate datagram. The fragment header contains enough
+information to enable reassembly. If the complete set of fragments is not
+received in a reasonable time, the whole object shall be considered lost.
+
+QUIC does not guarantee the reliable delivery of datagrams. Nodes SHOULD only
+opt to send fragments as datagrams if they can implement a reliable
+delivery mechanism, such as using QUIC acknowledgements to infer whether the
+QUIC packet containing the datagram frame was acknowledged or is considered
+lost, and resending lost fragments as appropriate.
+
+Some WebTransport stacks do not guarantee that datagrams acknowledged at the
+QUIC level are actually delivered through the WebTransport Datagram API.
+MoQ nodes using such stacks MUST NOT enable transmission of objects as datagrams.
 
 ### Fragment Message
 
-The Fragment message is used to convey the content of a object as a series
-of fragments:
-
+In the datagram variants, instead of sending a series of whole objects
+on a stream, objects are sent as series of fragments, using the
+Fragment message:
 ```
 fragment {
   message_type(i),
@@ -608,43 +673,7 @@ Sending a placeholder allows node to differentiate between a
 temporary packet loss, which will be soon corrected, and a
 deliberate object drop.
 
-## Stream Considerations {#stream-considerations}
-
-Certain applications can choose to send each group in their own
-unidirectional QUIC stream. In such cases, stream will start with
-a "group header" message specifying the media ID and the group ID,
-followed for each object in the group by an "object header"
-specifying the object ID and the object length and then the content
-of the objects (as depicted below)
-
-```
-+--------+------------+-------+------------+-------+------
-| Group  | Object     | Bytes | Object     | Bytes |
-| header | header (0) |  (0)  | header (1) |  (1)  | ...
-+--------+------------+-------+------------+-------+------
-```
-
-The first object in the stream is object number 0, followed by 1, etc.
-Arrival of objects out of order will be treated as a protocol error.
-
-Alternatively, certain applications can choose to send each object
-in its own unidirectional QUIC stream. In such cases, each stream
-will start with a "group header" message specifying the
-media ID and the group ID, followed by a single "object header"
-and then the content of the objects (as depicted below).
-
-```
-+--------+------------+-------+
-| Group  | Object     | Bytes |
-| header | header (n) |  (n)  |
-+--------+------------+-------+
-```
-
-The MOQTransport doesn't enforce a rule to follow for the applications,
-but instead aims to provide tools for the applications to make
-the choices appropriate for their use-cases.
-
-# Priority {#priority}
+# Drop Priority {#priority}
 
 In case of congestion, the MoQ nodes may have to drop some traffic in
 order to avoid building large queues. The drop algorithm must respect
@@ -656,18 +685,18 @@ decisions on two propertes of objects:
   rather see the object queued (droppable=False) or dropped (droppable=True)
   in case of congestion.
 
-* a "priority" value, which indicates the relative priority of this
+* a "drop-priority" value, which indicates the relative priority of this
   object versus other objects in the track or other tracks in the connection.
 
-Higher values of the priority field indicate higher drop priorities: objects
+Higher values of the dro-priority field indicate higher drop priorities: objects
 mark with priority 0 would be the last to be dropped, objects marked with
 priority 3 would be dropped before dropping objects with priority 2, etc. Nodes
-support up to 8 priority levels, numbered 0 to 7.
+support up to 8 drop-priority levels, numbered 0 to 7.
 
-Nodes may use priorities in two ways: either by delegating to the QUIC stack, or
+Nodes may use drop-priorities in two ways: either by delegating to the QUIC stack, or
 by monitoring the state of congestion and performing their own scheduling.
 
-## Applying priorities through the QUIC stack
+## Applying drop-priorities through the QUIC stack
 
 Many QUIC stack allow application to associate a priority with a stream.
 The MoQ transports can use that feature to delegate priority enforcement
@@ -697,7 +726,7 @@ have been sent or not:
 These policies will normally ensure that for any congestion state, only the
 most urgent objects are sent.
 
-## Applying priorities through active scheduling
+## Applying drop-priorities through active scheduling
 
 Some transport strategies prevent delegation of priority enforcement to the
 QUIC stack. For example, if the policy is to use a single QUIC stream or
@@ -784,7 +813,7 @@ Relays provide several benefits including
 
 ## Relay - Subscriber Interactions
 
-Subscribers interact with the "Relays" by sending a "subscribe" ((#subscribe)) command
+Subscribers interact with the "Relays" by sending a "subscribe" {subscribe} command
 for the tracks of interest.
 
 Relays MUST be willing to act on behalf of the subscriptions before they can forward
@@ -871,31 +900,32 @@ Note: The notation for identifying the resources for subscription are for
 
 ~~~~
 
-                                                      sub: acme.tv/brodcasts/channel8/alice/sd
-                                                               ─────.
-                                                      ┌──────(  S1   )
-                                                      │       `─────'
-                                                      │
-         sub: acme.tv/broadcasts/channel8/alice/4k    |
-         sub: acme.tv/brodcasts/channel8/alice/sd     |
-         sub: acme.tv/brodcasts/channel8/alice/hd     |
-            │                                         |
-┌──────────────┐                ┌──────────────┐      │
-│              │                │              │      │  sub: acme.tv/brodcasts/channel8/alice/4k
-|              |                |              |      |
-│   Ingest     │ ◀──────────────┤  Relay-Edge  │◀─────┘       .─────.
-│              │                │              │◀────────────(  S2   )
-└──────▲───────┘                └──────────────┘◀─────┐       `─────'
-       │                                              │          ◉
-       │                                              │          ◉
-    .─────.                                           │          ◉
-   ( Alice )                                          │
-    `─────'                                           │        .─────.
-                                                      └───────(  SN   )
-pub: acme.tv/broadcasts/channel8/alice/hd                      `─────'
-pub: acme.tv/broadcasts/channel8/alice/sd
-pub: acme.tv/broadcasts/channel8/alice/4k            sub: acme.tv/brodcasts/channel8/alice/sd
-                                                     sub: acme.tv/brodcasts/channel8/alice/hd
+                                sub: acme.tv/brodcasts/channel8/alice/sd
+                                                     .─────.
+                                             ┌──────(  S1   )
+                                             │       `─────'
+                                             │
+   sub: acme.tv/broadcasts/channel8/alice/4k |
+   sub: acme.tv/brodcasts/channel8/alice/sd  |
+   sub: acme.tv/brodcasts/channel8/alice/hd  |
+       │                                     |
+┌──────────────┐          ┌──────────────┐   │
+│              │          │              │   | sub: acme.tv/brodcasts/
+|              |          |              |   |        channel8/alice/4k
+│   Ingest     │ ◀────────┤  Relay-Edge  │◀─┘     .─────.
+│              │          │              │◀───────(  S2   )
+└──────▲───────┘          └──────────────┘◀────┐  `─────'
+       │                                        │     ◉
+       │                                        │     ◉
+    .─────.                                     │     ◉
+   ( Alice )                                    │
+    `─────'                                     │   .─────.
+pub: acme.tv/broadcasts/channel8/alice/hd       └──(  SN   )
+pub: acme.tv/broadcasts/channel8/alice/sd           `─────'
+pub: acme.tv/broadcasts/channel8/alice/4k
+
+                                  sub: acme.tv/brodcasts/channel8/alice/sd
+                                  sub: acme.tv/brodcasts/channel8/alice/hd
 
 ~~~~
 
@@ -909,34 +939,36 @@ Similarly, below example shows an Interactive media session
   pub: acme.com/meetings/m123/bob/video
   pub: acme.com/meetings/m123/bob/audio
 
-              .─────.     sub:acme.com/meetings/m123/alice/audio
-             (  Bob  )
-              `─────'     sub:acme.com/meetings/m123/alice/video
-                 │
-                 │        sub:acme.com/meetings/m123/bob/audio
-                 │
-                 │        sub:acme.com/meetings/m123/bob/video
-                 │
-          ┌──────▼───────┐                ┌──────────────┐
-          │              │                │              │
-          │    Relay     │ ◀──────────────┤    Relay     │◀─────|
-          │              │                │              │      |
-          └──────▲───────┘                └──────────────┘      |
-                 │                                              │
-                 │                                              │
-                 │                                              │
-                 │                                              │
-              .─────.                                           │
-             ( Alice )                                          │
-              `─────'                                           │        .─────.
-                                                                └───────(  S1   )
-     pub: acme.com/meetings/m123/alice/video                             `─────'
+      .─────.     sub:acme.com/meetings/m123/alice/audio
+     (  Bob  )
+      `─────'     sub:acme.com/meetings/m123/alice/video
+         │
+         │        sub:acme.com/meetings/m123/bob/audio
+         │
+         │        sub:acme.com/meetings/m123/bob/video
+         │
+  ┌──────▼───────┐                ┌──────────────┐
+  │              │                │              │
+  │    Relay     │ ◀──────────────┤    Relay     │◀──|
+  │              │                │              │    |
+  └──────▲───────┘                └──────────────┘    |
+         │                                            │
+         │                                            │
+         │                                            │
+         │                                            │
+      .─────.                                         │
+     ( Alice )                                        │
+      `─────'                                         │        .─────.
+                                                      └───────(  S1   )
+     pub: acme.com/meetings/m123/alice/video                   `─────'
      pub: acme.com/meetings/m123/alice/audio
-                                                        sub:acme.com/meetings/m123/alice/audio
-                                                        sub:acme.com/meetings/m123/alice/video
-                                                        sub:acme.com/meetings/m123/bob/audio
-                                                        sub:acme.com/meetings/m123/bob/video
+                                 sub:acme.com/meetings/m123/alice/audio
+                                 sub:acme.com/meetings/m123/alice/video
+                                 sub:acme.com/meetings/m123/bob/audio
+                                 sub:acme.com/meetings/m123/bob/video
 
+
+-------+-------+-------+-------+-------+-------+-------+-------+-------+
 ~~~~
 
 The above picture shows as sample media delivery, where
@@ -956,7 +988,21 @@ as needed, to setup the delivery network.
 Following subsections define usages of the MoQTransport over
 WebTransport and over raw QUIC.
 
-## WebTransport
+## MoQ over QUIC
+
+MoQ can run directly over QUIC. In that case, the following apply:
+
+* Connection setup corresponds to the establishment of a QUIC connection,
+  in which the ALPN value indicates use of MoQ. For versions implementing
+  this draft, the ALPN value is set to "moq-n00".
+* Bilateral and unilateral streams are mapped directly to
+  equivalent QUIC streams
+* Datagrams, when used, are mapped directly to QUIC datagram frames.
+
+## MoQ over WebTransport
+
+MoQ can benefit from an infrastructure designed for HTTP3 by running
+over WebTransport.
 
 WebTransport provides protocol framework that enables clients constrained
 by the Web security model to communicate with a remote server using a
@@ -964,16 +1010,18 @@ secure multiplexed transport. WebTransport protocol also provides
 support for unidirectional streams, bidirectional streams and
 datagrams, all multiplexed within the same HTTP/3 connection.
 
-MoqTransport uses WebTransport over HTTP/3.
-
-
-### Setup
-
 Clients (publishers and subscribers) setup WebTransport Session
 via HTTP CONNECT request for the application provided MoQSession and
 provide the necessary authentication information
-(in the form of authentication token). In case of any errors,
+(in the form of authentication token). The ":protocol" value 
+indicates use of MoQ. For versions implementing
+this draft, the :protocol value is set to "moq-n00".
+
+In case of any errors,
 the session is terminated and reported to the application.
+
+Bilateral and unilateral streams are opened and used through the
+WebTransport APIs.
 
 ### Catalog Retrieval
 
@@ -1017,7 +1065,7 @@ them to perform the track subscriptions based on the application
 requirements.
 
 Tracks subscription is done by sending `subscribe` message
-as definedin ((#subscribe))
+as definedin {subscribe}
 
 On successful subscription, subscribers should be ready to
 consume media on one or more Data Streams as identified by their
@@ -1041,7 +1089,7 @@ on the tracks advertised.
 
 
 Publishing objects on the tracks follow the procedures
-defined in ((#data)) and ((#stream-considerations)).
+defined in {data} and {stream-considerations}.
 
 
 ## MoQTransport over QUIC
@@ -1052,7 +1100,20 @@ negotiated using ALPN "moqt-01"
 
 TODO Fill this section.
 
-{backmatter}
+
+# Security and Privacy Considerations
+
+TODO: fill this section.
+
+
+# IANA Considerations
+
+TODO: fill this section. Register ALPN. Register WebTransport protocol.
+Open new registry for MoQ message types. Possibly, open registry for
+MoQ errors.
+
+
+--- back
 
 # TODO
 
