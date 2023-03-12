@@ -236,10 +236,11 @@ will use the priorities to selectively drop the "least important" objects:
 
 When dropping objects within the same priority: 
 
-* higher object numbers, which are later in the group are "less
-  important" more likely to be dropped than larger object numbers but
-  objects in earlier previous MAY be dropped ahead of the current
-  group.
+* higher object numbers in the same group, which are later in the group,
+  are "less important" and more likely to be dropped than objects in the
+  same group with a lower object number. Objects in a previous group are
+  "less important" than objects in the current group and MAY be dropped
+  ahead of objects in the current group.
 
 The specification above assumes that the relay can detect the onset
 of congestion, and has a way to drop objects. There are several ways to
