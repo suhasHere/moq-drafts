@@ -50,23 +50,72 @@ One ambition of MoQ is to define a single QUIC based transport for multiple tran
 
 This section few scenarios for streaming use-cases. The scenarios listed are not exhaustive and doesn't intend to capture all possible application and architectures.
 
-Streaming scenarios typically separate "content ingestion" and "content distribution". Content is provided by one or several "emitters"
+Streaming scenarios typically separate "content ingestion" and "content distribution". Content is provided by one or several "emitters". Streaming scenarios typically
+operate with latency profile between 500 ms - 2 ms for live streaming use-cases.
+
+## Live Video Ingestion
+
+In a typical live video ingestion, the broascast client - like OBS client,
+publishes the video content to an ingest server under a provider domain
+(say twicth.com)
 
 ~~~
-live.tw.tv
-OBS Client -> Ingest Server
-  (Emitter)
 
-Distribution Server -> Clients
-  Catalog that has tracks
- Latency = 500ms - 2 seconds
-                   (maps to GOP length)
+               E1: t1,t2,t3   ┌──────────┐
+ .─────────────.              │          │
+(    Emitter    )────────────▶│  Ingest  │
+ `─────────────'              │  Server  │
+                              │          │
+                              └──────────┘
+
 ~~~
+
+The Track IDs are scoped to the broadcast under the provider and
+may not need to have scope beyond that.
+
+
+## Live Streaming
+
+In a reference live streaming example shown below,
+the emitter live streams on or more tracks
+as part of the application operated under a
+provider domain, which gets eventually distributed
+to multiple clients by some form of distribution
+server operating under the provider domain,
+over a content distribution network.
+
+In this setup, one can imagine the ingestion and
+distribution as 2 separate systems operating
+under a given provider domain,  where the
+track names used by the emitter need not match
+the names referrred to by the subscribers.
+The reason being, the distribution server sources
+the new tracks.
+
+~~~
+
+                                                                 DS: t1,t2
+                                                                   .───.
+                                                          ┌──────▶( S1  )
+                                                          │        `───'
+                                                          │
+        E1: t1,t2,t3 ┌──────────┐    ┌──────────────┬─────┘     DS: t1
+.─────────.          │          │    │              │         .───.
+(   E1    )─────────▶│  Ingest  ├────┤  Distributon │───────▶( S2  )
+`─────────'          │  Server  │    │      Server  |         `───'
+                     │          │    │              │
+                     └──────────┘    └──────────────┴─────┐
+                                                          │        .───.
+                                                          └──────▶( S3  )
+                                                                   `───'
+                                                                DS: t1,t2, t3
+~~~
+
 
 ## Conferencing Scenarios - Classic
 
-A interactive conferencing typically work under the
-glass-to-glass latency to be around 200ms and is made up
+A interactive conference typically works under the
+operating glass-to-glass latency to be around 200ms and is made up
 of multiplcitiy of participant with varying capabilities
 and operating under varying network conditions.
 
@@ -112,7 +161,7 @@ transport protocol
 
 - Media Switches to source new tracks but retain media payload from
   the original emitters. This implies new Track IDs sourced from the
-  SFU, with obejct payload unchanged from the original emitters.
+  SFU, with object payload unchanged from the original emitters.
 
 - Media Switches to propogate subset of tracks as-is from the emitters
   to the subscribers. This implies Track IDs to be scoped end to end.
@@ -360,3 +409,16 @@ The optimal solution in this case is to use datagrams with a time to
 live on the object so they are discarded if they are can not be
 delivered in time.
 
+# Security Considerations
+
+This specification doesn't specify any protocol changes, but rather
+provdes an overview and comparisions between streaming and
+interactive architecture.
+
+# IANA Considerations {#iana}
+
+This specification doesn't make any recommendation to IANA
+
+# Acknowledgments
+
+The IETF MoQ mailing lists and discussion groups.
