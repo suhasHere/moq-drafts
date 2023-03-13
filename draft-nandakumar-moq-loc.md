@@ -1,49 +1,181 @@
-%%%
-title = "Realtime Media Container"
-abbrev = "container"
-ipr = "none"
-workgroup = "moq"
-keyword = ["quic", "moq", "rtp"]
+---
+title: "Realtime Media Container"
+abbrev: "container"
+category: info
 
-[seriesInfo]
-name = "Internet-Draft"
-value = "moq-realtime-media-container"
-status = "standard"
+docname: draft-law-moq-catalog-latest
+date: {DATE}
+category: info
+submissiontype: IETF
+consensus: true
+v: 3
 
-[[author]]
-initials="S."
-surname="Nandakumar"
-fullname="Suhas Nandakumar"
-organization="Cisco"
-    [author.address]
-    email = "snandaku@cisco.com"
+area: "RAI"
+workgroup: "Media Over QUIC"
+venue:
+  group: "Media Over QUIC"
+  type: "Working Group"
+  mail: "moq@ietf.org"
+  arch: "https://mailarchive.ietf.org/arch/browse/moq/"
+  github: "suhasHere/moq-drafts"
 
-[[author]]
-initials="M."
-surname="Zanaty"
-fullname="Mo Zanaty"
-organization="Cisco"
-    [author.address]
-    email = "mzanaty@cisco.com"
+author:
+ -
+    fullname: Suhas Nandakumar
+    organization: Cisco
+    email: snandaku@cisco.com
+ -
+    fullname: Mo Zanaty
+    organization: Cisco
+    email: mzanaty@cisco.com
+ -
+    fullname: Peter Thatcher
+    organization: Microsoft
+    email: pthatcher@microsoft.com
 
-[[author]]
-initials="P."
-surname="Thatcher"
-fullname="Peter Thatcher"
-organization="Microsoft"
-    [author.address]
-    email = "pthatcher@microsoft.com"
+normative:
+  AV1:
+    title: "AV1 Bitstream & Decoding Process Specification"
+    date: January 18, 2019
+    seriesinfo:
+      Alliance for Open Media
+    target: https://aomedia.org/av1/specification/
+    authors:
+      -
+        ins: P. de Rivaz
+        name: Peter de Rivaz
+        org: Argon Design
+      -
+        ins: J. Haughton
+        name: Jack Haughton
+        org: Argon Design
 
-%%%
+  H.264:
+    title: "Advanced video coding for generic audiovisual services"
+    date: 2013
+    seriesinfo:
+      ITU-T: Recommendation H.264
+    author:
+      -
+        org: ITU-T
 
-.# Abstract
+  HEVC:
+    title: "High efficiency video coding"
+    date: 08/2021
+    seriesinfo:
+      ITU-T: Recommendation H.265
+    author:
+      -
+        org: ITU-T
+
+  ISO14496-15:
+    title: "Information technology — Coding of audio-visual objects — Part 15: Carriage of network abstraction layer"
+    date: 08/2022
+    seriesinfo:
+      ISO/IEC: 14496-15 
+    author:
+      -
+        org: ISO/IEC
+
+  VP9:
+    title: "VP9 Bitstream & Decoding Process Specification"
+    date: 2016
+    seriesinfo:
+      Google: Google APIs 
+    target: 
+      https://storage.googleapis.com/downloads.webmproject.org/
+              docs/vp9/vp9-bitstream-specification-
+              v0.6-20160331-draft.pdf
+    author:
+      -
+        ins: A. Grange
+        name: Adrian Grange
+        org: Google
+      -
+        ins: P. de Rivaz
+        name: Peter de Rivaz
+        org: Argon Design
+      -
+        ins: J. Hunt
+        name: Jonathan Hunt
+        org: Argon Design
+
+informative:
+
+  OpenID:
+    target: "http://openid.net/specs/openid-connect-core-1_0.html"
+    title: "OpenID Connect Core 1.0 incoClientorating errata set 1"
+    date: 2014/11/08
+    author:
+      -
+        ins: N. Sakimura
+        name: Nat Sakimura
+        org: NRI
+      -
+        ins: J. Bradley
+        name: John Bradley
+        org: Ping Identity
+      -
+        ins: M. Jones
+        name: Mike Jones
+        org: Microsoft
+      -
+        ins: B. de Medeiros
+        name: Breno de Medeiros
+        org: Google
+      -
+        ins: C. Mortimore
+        name: Chuck Mortimore
+        org: Salesforce
+
+  OpenID.Discovery:
+    target: "https://openid.net/specs/openid-connect-discovery-1_0.html"
+    title: "OpenID Connect Discovery 1.0 incoClientorating errata set 1"
+    date: 2014/11/08
+    author:
+      -
+        ins: N. Sakimura
+        name: Nat Sakimura
+        org: NRI
+      -
+        ins: J. Bradley
+        name: John Bradley
+        org: Ping Identity
+      -
+        ins: B. de Medeiros
+        name: Breno de Medeiros
+        org: Google
+      -
+        ins: E. Jay
+        name: Edmund Jay
+        org: Illumila
+
+  OpenID.DPoP:
+    target: "https://openid.net/todo"
+    title: Demonstrating Proof of Possession in OpenID Connect
+    date: 2022/01/01
+    author:
+      -
+        ins: M. Jones
+        name: Mike Jones
+        org: Microsoft
+      -
+        ins: R. Barnes
+        name: Richard Barnes
+        org: Cisco
+      -
+        ins: P. Kasselman
+        name: Pieter Kasselman
+        org: Microsoft
+
+--- abstract
 
 This specification describes a media container format for
 encoded and encrypted audio and video media data to be used
 for interactive media usecases, with the goal of it being
 a low overhead format.
 
-{mainmatter}
+--- middle
 
 # Introduction - Mo
 
@@ -63,7 +195,7 @@ generic low overhead container format.l.
 
 ## Requirements Notation and Conventions
 
-The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD","SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119 [RFC2119].
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD","SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in {{!RFC2119}}.
 
 ## Terminology
 
@@ -75,33 +207,35 @@ TODO
 This section specifies format of the encoded payload for several
 audio and video codecs.
 
+TODO: verify and fix references.
+
 ## AV1
 
-The encoded video data MUST conform to EncodedVideoChunk Data format as defined in section 2 of [!@WC-AV1], which is expected to be data compliant to the "low-overhead bitstream format" as described in Section 5 of [AV1].
+The encoded video data MUST conform to EncodedVideoChunk Data format as defined in section 2 of {{AV1}}, which is expected to be data compliant to the "low-overhead bitstream format" as described in Section 5 of {{AV1}}.
 
 
 ## AVC/H.264
 
-The encoded video data MUST conform to EncodedVideoChunk Data format as defined in section 2 of [!@WC-AVC] with the bistream is expected to be
-in canonical format, as defined in [iso14496-15] section 5.3.2.
+The encoded video data MUST conform to EncodedVideoChunk Data format as defined in section 2 of {{H.264}} with the bistream is expected to be
+in canonical format, as defined in {{ISO14496-15}} section 5.3.2.
 
 ## HEVC/H.265
 
-The encoded video data MUST conform to EncodedVideoChunk Data format as defined in section 2 of [!@WC-HEVC] with the bistream is expected to be
-in canonical format, as defined in [iso14496-15] section 8.3.2.
+The encoded video data MUST conform to EncodedVideoChunk Data format as defined in section 2 of {{HEVC}} with the bistream is expected to be
+in canonical format, as defined in {{ISO14496-15}} section 8.3.2.
 
 ## VP8
 
-The encoded video data MUST conform to EncodedVideoChunk Data format as defined in section 2 of [!@WC-VP8], which is expected to be frame as described in Section 4 and Annex A of [VP8].
+The encoded video data MUST conform to EncodedVideoChunk Data format as defined in section 2 of {{!RFC6386}}, which is expected to be frame as described in Section 4 and Annex A of {{!RFC6386}}.
 
-## VP9
+## VP9 {#vp9-payload}
 
-The encoded video data MUST conform to EncodedVideoChunk Data format as defined in section 2 of [!@WC-VP8], which is expected to be frame as described in Section 6 of [VP9].
+The encoded video data MUST conform to EncodedVideoChunk Data format as defined in section 2 of {{!RFC6386}}, which is expected to be frame as described in Section 6 of {{VP9}}.
 
 
 ## OPUS
 
-The encoded audio data MUST conform to format as defined in Section 2 of [!@WC-OPUS] when the bitstream is in opus format. Bitstream of ogg format MUST NOT be used.
+The encoded audio data MUST conform to format as defined in Section 2 of {{!RFC6716}} when the bitstream is in opus format. Bitstream of ogg format MUST NOT be used.
 
 # Payload Header Data
 
@@ -125,7 +259,7 @@ Following metadata MUST be captures for each media frame
 
 ## Audio Metadata
 
-*Audio Level* captures the magnitude of the audio level of the corresponding audio frame and valus in encoded in 7 bits as defined in the Section 3 of RFC6464
+*Audio Level* captures the magnitude of the audio level of the corresponding audio frame and valus in encoded in 7 bits as defined in the section 3 of {{!RFC6464}}
 
 # Metadata Registration
 
@@ -149,6 +283,8 @@ with keys from symmetric keying mechanisms, such a MLS, and the payload itself i
 # MOQ Transport Mapping
 
 ## Extra
+
+~~~~
 What needs to be agreed on or standardized?
 What are the “bytes” of the “payload” for a codec?
 Just do what’s defined at https://w3c.github.io/webcodecs/codec_registry.html
@@ -161,9 +297,9 @@ CBOR is viable; just define list of (id, type)
 Another thing we could do: define our own TLV using QUIC base types?
 With e2ee, What metadata is exposed to routers/server and which is encrypted and only seen by endpoints?
 For SVC, is it 1 frame or N?  Update: for WebCodecs, it will be N frames (AKA EncodedVideoChunks)
+~~~~
 
-
-
+~~~~
 hbhauth		e2eau		e2ee
 [object_header][payload metadata][payload]
 Object header
@@ -194,7 +330,7 @@ Container Format
 Moq Transport Mapping
  	Seuence = ObjectId
 	Idr = group boundary
-
+~~~~
 
 
 
@@ -209,65 +345,10 @@ attributes.
 
 todo
 
-{backmatter}
 
-<reference anchor="OpenID" target="http://openid.net/specs/openid-connect-core-1_0.html">
-  <front>
-    <title>OpenID Connect Core 1.0 incoClientorating errata set 1</title>
-    <author initials="N." surname="Sakimura" fullname="Nat Sakimura">
-      <organization>NRI</organization>
-    </author>
-    <author initials="J." surname="Bradley" fullname="John Bradley">
-      <organization>Ping Identity</organization>
-    </author>
-    <author initials="M." surname="Jones" fullname="Mike Jones">
-      <organization>Microsoft</organization>
-    </author>
-    <author initials="B." surname="de Medeiros" fullname="Breno de Medeiros">
-      <organization>Google</organization>
-    </author>
-    <author initials="C." surname="Mortimore" fullname="Chuck Mortimore">
-      <organization>Salesforce</organization>
-    </author>
-   <date day="8" month="Nov" year="2014"/>
-  </front>
-</reference>
 
-<reference anchor="OpenID.Discovery" target="https://openid.net/specs/openid-connect-discovery-1_0.html">
-  <front>
-    <title>OpenID Connect Discovery 1.0 incoClientorating errata set 1</title>
-    <author initials="N." surname="Sakimura" fullname="Nat Sakimura">
-      <organization>NRI</organization>
-    </author>
-    <author initials="J." surname="Bradley" fullname="John Bradley">
-      <organization>Ping Identity</organization>
-    </author>
-    <author initials="B." surname="de Medeiros" fullname="Breno de Medeiros">
-      <organization>Google</organization>
-    </author>
-    <author initials="E." surname="Jay" fullname="Edmund Jay">
-      <organization> Illumila </organization>
-    </author>
-   <date day="8" month="Nov" year="2014"/>
-  </front>
-</reference>
-
-<reference anchor="OpenID.DPoP" target="https://openid.net/todo">
-      <front>
-      <title>Demonstrating Proof of Possession in OpenID Connect</title>
-      <author fullname="Mike Jones">
-        <organization>Microsoft</organization>
-      </author>
-      <author fullname="Richard Barnes">
-        <organization>Cisco</organization>
-      </author>
-      <author fullname="Pieter Kasselman">
-        <organization>Microsoft</organization>
-      </author>
-      <date day="1" month="Jan" year="2022"/>
-      </front>
- </reference>
+--- back
 
 # Acknowledgements {#Acknowledgements}
 
-[[ TODO ]]
+TODO
