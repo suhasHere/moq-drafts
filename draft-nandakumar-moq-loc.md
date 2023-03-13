@@ -38,7 +38,7 @@ normative:
     date: January 18, 2019
     seriesinfo:
       Alliance for Open Media
-    url: https://aomedia.org/av1/specification/
+    target: https://aomedia.org/av1/specification/
     authors:
       -
         ins: P. de Rivaz
@@ -53,7 +53,7 @@ normative:
     title: "Advanced video coding for generic audiovisual services"
     date: 2013
     seriesinfo:
-      ITU-T Recommendation H.264
+      ITU-T: Recommendation H.264
     author:
       -
         org: ITU-T
@@ -62,16 +62,16 @@ normative:
     title: "High efficiency video coding"
     date: 08/2021
     seriesinfo:
-      ITU-T Recommendation H.265
+      ITU-T: Recommendation H.265
     author:
       -
         org: ITU-T
 
-  iso14496-15:
+  isols14496-15:
     title: "Information technology — Coding of audio-visual objects — Part 15: Carriage of network abstraction layer"
     date: 08/2022
     seriesinfo:
-      ISO/IEC 14496-15 
+      ISO/IEC: 14496-15 
     author:
       -
         org: ISO/IEC
@@ -80,8 +80,8 @@ normative:
     title: "VP9 Bitstream & Decoding Process Specification"
     date: 2016
     seriesinfo:
-      Google APIs 
-    url: 
+      Google: Google APIs 
+    target: 
       https://storage.googleapis.com/downloads.webmproject.org/
               docs/vp9/vp9-bitstream-specification-
               v0.6-20160331-draft.pdf
@@ -338,4 +338,4 @@ todo
 
 # Acknowledgements {#Acknowledgements}
 
-[[ TODO ]]
+TODO
