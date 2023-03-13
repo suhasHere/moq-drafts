@@ -109,10 +109,10 @@ Commonly used terms in this document are described below:
 * Emitter: Authorized entities that participate in a MoQTransport
   Session under an Provider. Emitters are trusted with E2E encryption
   keys for the media and operate on one or more
-  Source Streams {Section 2.1.5 of RFC7656}. They perform media
+  Source Streams {{Section 2.1.5 of RFC7656}}. They perform media
   encoding transform, thus transforming a given source stream into
   one or more representations, usually more compact, known as
-  Encoded Streams {Section 2.1.7 of RFC7656}. They further transform
+  Encoded Streams {{Section 2.1.7 of RFC7656}}. They further transform
   the encoded stream into Encrypted Stream. Each such encoded and/or
   encrpyted stream corresponds to a Track within the MoQ transport protocol.
 
@@ -140,7 +140,7 @@ enabling media delivery over QUIC.
 Tracks form the central concept within the MoQ Transport
 protocol for delivering media. A Track identifies the namespace
 and the authorization scope under which MoQ Media objects
-{objects} are delivered.
+{{objects}} are delivered.
 
 A track is a transform of a Source Media Stream {{!RFC7656}} using a
 specific encoding process, a set of parameters for
@@ -167,7 +167,7 @@ then followed by the application context specific "Track Name".
 The binary content of a track is composed of a sequence
 of objects. An Object is the smallest unit that makes
 sense to decode and may not be independently decodable.
-An Object MUST belong to a group {groups}
+An Object MUST belong to a group {{groups}}
 
 Few examples include, for video media an object could
 be an H.264 P frame or could be just a single slice from
@@ -185,7 +185,7 @@ containining priority, time to live, and
 other information aiding the caching/forwarding decision at
 the Relays. Objects MAY be optionally cached at Relays.
 The content of the Objects are opaque to Relays and delivered
-on the strict priority order {priority}
+on the strict priority order {{priority}}
 
 
 ## Object Groups {#groups}
@@ -234,7 +234,7 @@ Few example of Emissions include,
 
 ## Catalog {#catalog}
 
-Catalog is a MOQ Object scoped to a MoQSession {session} that
+Catalog is a MOQ Object scoped to a MoQSession {{session}} that
 provides information about tracks from one of more Emissions and
 is used by the subscribers for consuming tracks and for publishers
 to advertise the tracks. The content of "Catalog" is opaque to the
@@ -461,7 +461,7 @@ The message_type is set to PUBLISH\_REPLY (4).
 
 `tracks` capture the result of publish request per track included
 in the `publish_request` message. The semantics of `track_response`
-is same as defined in {subscribe-reply} except the `media_id`
+is same as defined in {{subscribe-reply}} except the `media_id`
 is optionally populated in the case where the `media_id` in the
 request cannot be used.
 
@@ -552,7 +552,7 @@ group_header {
 
 The message type is set to GROUP_HEADER, 11. `media_id` MUST correspond
 to the one that was setup as part of `publish_request` control
-message exchage {publish_req}. `group_id` always starts at 0 and
+message exchage {{publish_req}}. `group_id` always starts at 0 and
 increases sequentially at the original media publisher.
 
 
@@ -824,7 +824,7 @@ Relays provide several benefits including
 
 ## Relay - Subscriber Interactions
 
-Subscribers interact with the "Relays" by sending a "subscribe" {subscribe} command
+Subscribers interact with the "Relays" by sending a "subscribe" {{subscribe}} command
 for the tracks of interest.
 
 Relays MUST be willing to act on behalf of the subscriptions before they can forward
@@ -1074,7 +1074,7 @@ them to perform the track subscriptions based on the application
 requirements.
 
 Tracks subscription is done by sending `subscribe` message
-as definedin {subscribe}
+as definedin {{subscribe}}
 
 On successful subscription, subscribers should be ready to
 consume media on one or more Data Streams as identified by their
@@ -1098,7 +1098,7 @@ on the tracks advertised.
 
 
 Publishing objects on the tracks follow the procedures
-defined in {data} and {stream-considerations}.
+defined in {{data}} and {{stream-considerations}}.
 
 
 ## MoQTransport over QUIC
