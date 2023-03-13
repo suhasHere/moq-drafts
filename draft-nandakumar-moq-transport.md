@@ -1098,7 +1098,7 @@ on the tracks advertised.
 
 
 Publishing objects on the tracks follow the procedures
-defined in {{stream-considerations}} and {{#datagrams}}.
+defined in {{stream-considerations}} and {{datagrams}}.
 
 
 ## MoQTransport over QUIC
