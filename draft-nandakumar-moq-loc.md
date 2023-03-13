@@ -1,49 +1,51 @@
-%%%
-title = "Realtime Media Container"
-abbrev = "container"
-ipr = "none"
-workgroup = "moq"
-keyword = ["quic", "moq", "rtp"]
 
-[seriesInfo]
-name = "Internet-Draft"
-value = "moq-realtime-media-container"
-status = "standard"
+---
+title: "Realtime Media Container"
+abbrev: "container"
+category: info
 
-[[author]]
-initials="S."
-surname="Nandakumar"
-fullname="Suhas Nandakumar"
-organization="Cisco"
-    [author.address]
-    email = "snandaku@cisco.com"
+docname: draft-law-moq-catalog-latest
+date: {DATE}
+category: info
+submissiontype: IETF
+consensus: true
 
-[[author]]
-initials="M."
-surname="Zanaty"
-fullname="Mo Zanaty"
-organization="Cisco"
-    [author.address]
-    email = "mzanaty@cisco.com"
+area: "RAI"
+workgroup: "Media Over QUIC"
+venue:
+  group: "Media Over QUIC"
+  type: "Working Group"
+  mail: "moq@ietf.org"
+  arch: "https://mailarchive.ietf.org/arch/browse/moq/"
+  github: "suhasHere/moq-drafts"
 
-[[author]]
-initials="P."
-surname="Thatcher"
-fullname="Peter Thatcher"
-organization="Microsoft"
-    [author.address]
-    email = "pthatcher@microsoft.com"
+author:
+ -
+    fullname: Suhas Nandakumar
+    organization: Cisco
+    email: snandaku@cisco.com
+ -
+    fullname: Mo Zanaty
+    organization: Cisco
+    email: mzanaty@cisco.com
+ -
+    fullname: Peter Thatcher
+    organization: Microsoft
+    email: pthatcher@microsoft.com
 
-%%%
+normative:
 
-.# Abstract
+informative:
+
+
+--- abstract
 
 This specification describes a media container format for
 encoded and encrypted audio and video media data to be used
 for interactive media usecases, with the goal of it being
 a low overhead format.
 
-{mainmatter}
+--- middle
 
 # Introduction - Mo
 
