@@ -361,7 +361,7 @@ behind a Relay or the provider.
 A `subscribe_reply` provides results of the subscription and is sent
 on the control stream over which the `subscribe` control message was received.
 
-~~~
+~~~~
 enum response
 {
   ok(0),
@@ -373,9 +373,9 @@ track_response {
   Response response,
   track_id_length(i),
   track_id(...)...,
-  \[Reason Phrase Length (i)\],
-  \[Reason Phrase (...)\],
-  \[media_id(i)\]
+  [ Reason Phrase Length (i) ],
+  [ Reason Phrase (...) ],
+  [ media_id(i) ]
 }
 
 subscribe_reply
@@ -383,7 +383,7 @@ subscribe_reply
   message_type(i),
   track_response tracks(...)
 }
-~~~
+~~~~
 
 The message type will be set to SUBSCRIBE\_REPLY (2). `tracks` capture
 the result of subscription per track included in the `subscribe` message.
@@ -615,6 +615,7 @@ MoQ nodes using such stacks MUST NOT enable transmission of objects as datagrams
 In the datagram variants, instead of sending a series of whole objects
 on a stream, objects are sent as series of fragments, using the
 Fragment message:
+
 ~~~
 fragment {
   message_type(i),
