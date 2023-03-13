@@ -959,25 +959,25 @@ Similarly, below example shows an Interactive media session
          │
          │        sub:acme.com/meetings/m123/bob/video
          │
-  ┌──────▼───────┐                ┌──────────────┐
-  │              │                │              │
-  │    Relay     │ ◀──────────────┤    Relay     │◀──|
-  │              │                │              │    |
-  └──────▲───────┘                └──────────────┘    |
-         │                                            │
-         │                                            │
-         │                                            │
-         │                                            │
-      .─────.                                         │
-     ( Alice )                                        │
-      `─────'                                         │        .─────.
-                                                      └───────(  S1   )
-     pub: acme.com/meetings/m123/alice/video                   `─────'
+  ┌──────▼───────┐           ┌──────────────┐
+  │              │           │              │
+  │    Relay     │ ◀─────────┤    Relay     │◀───┐
+  │              │           │              │    |
+  └──────▲───────┘           └──────────────┘    |
+         │                                       │
+         │                                       │
+         │                                       │
+         │                                       │
+      .─────.                                    │
+     ( Alice )                                   │
+      `─────'                                    │     .─────.
+                                                 └────(  S1   )
+     pub: acme.com/meetings/m123/alice/video           `─────'
      pub: acme.com/meetings/m123/alice/audio
-                                 sub:acme.com/meetings/m123/alice/audio
-                                 sub:acme.com/meetings/m123/alice/video
-                                 sub:acme.com/meetings/m123/bob/audio
-                                 sub:acme.com/meetings/m123/bob/video
+                            sub:acme.com/meetings/m123/alice/audio
+                            sub:acme.com/meetings/m123/alice/video
+                            sub:acme.com/meetings/m123/bob/audio
+                            sub:acme.com/meetings/m123/bob/video
 ~~~~
 
 The above picture shows as sample media delivery, where
