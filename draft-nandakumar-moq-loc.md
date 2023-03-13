@@ -67,7 +67,7 @@ normative:
       -
         org: ITU-T
 
-  isols14496-15:
+  ISO14496-15:
     title: "Information technology — Coding of audio-visual objects — Part 15: Carriage of network abstraction layer"
     date: 08/2022
     seriesinfo:
@@ -76,7 +76,7 @@ normative:
       -
         org: ISO/IEC
 
-  VP9-BITSTREAM:
+  VP9:
     title: "VP9 Bitstream & Decoding Process Specification"
     date: 2016
     seriesinfo:
@@ -151,12 +151,12 @@ The encoded video data MUST conform to EncodedVideoChunk Data format as defined 
 ## AVC/H.264
 
 The encoded video data MUST conform to EncodedVideoChunk Data format as defined in section 2 of {{H.264}} with the bistream is expected to be
-in canonical format, as defined in [iso14496-15] section 5.3.2.
+in canonical format, as defined in {{ISO14496-15}} section 5.3.2.
 
 ## HEVC/H.265
 
 The encoded video data MUST conform to EncodedVideoChunk Data format as defined in section 2 of {{HEVC}} with the bistream is expected to be
-in canonical format, as defined in {{iso14496-15}} section 8.3.2.
+in canonical format, as defined in {{ISO14496-15}} section 8.3.2.
 
 ## VP8
 
@@ -193,7 +193,7 @@ Following metadata MUST be captures for each media frame
 
 ## Audio Metadata
 
-*Audio Level* captures the magnitude of the audio level of the corresponding audio frame and valus in encoded in 7 bits as defined in the {{Section 3 of RFC6464}}
+*Audio Level* captures the magnitude of the audio level of the corresponding audio frame and valus in encoded in 7 bits as defined in the section 3 of {{!RFC6464}}
 
 # Metadata Registration
 
@@ -217,6 +217,8 @@ with keys from symmetric keying mechanisms, such a MLS, and the payload itself i
 # MOQ Transport Mapping
 
 ## Extra
+
+~~~~
 What needs to be agreed on or standardized?
 What are the “bytes” of the “payload” for a codec?
 Just do what’s defined at https://w3c.github.io/webcodecs/codec_registry.html
@@ -229,7 +231,7 @@ CBOR is viable; just define list of (id, type)
 Another thing we could do: define our own TLV using QUIC base types?
 With e2ee, What metadata is exposed to routers/server and which is encrypted and only seen by endpoints?
 For SVC, is it 1 frame or N?  Update: for WebCodecs, it will be N frames (AKA EncodedVideoChunks)
-
+~~~~
 
 ~~~~
 hbhauth		e2eau		e2ee
@@ -276,8 +278,6 @@ attributes.
 # IANA Considerations {#iana}
 
 todo
-
---- back
 
 <reference anchor="OpenID" target="http://openid.net/specs/openid-connect-core-1_0.html">
   <front>
@@ -335,6 +335,9 @@ todo
       <date day="1" month="Jan" year="2022"/>
       </front>
  </reference>
+
+
+--- back
 
 # Acknowledgements {#Acknowledgements}
 
