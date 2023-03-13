@@ -583,6 +583,7 @@ whether all these objects have been received.
 The `flags` field is used to maintain low latency by selectively
 dropping objects in case of congestion. 
 The flags field is encoded as:
+
 ~~~
 {
     maybe_dropped(1),
@@ -616,18 +617,18 @@ In the datagram variants, instead of sending a series of whole objects
 on a stream, objects are sent as series of fragments, using the
 Fragment message:
 
-~~~
+~~~~
 fragment {
   message_type(i),
-  \[media_id(i)\],
-  \[group_id(i)\],
-  \[object_id(i)\],
+  [ media_id(i) ],
+  [ group_id(i) ],
+  [ object_id(i) ],
   fragment_offset(i),
   object_length(i),
   fragment_length(i),
   data(...)
 }
-~~~
+~~~~
 
 The message type will be set to FRAGMENT (13). The optional fields
 `media_id`, `group_id` and `object_id` are provided in the cases
@@ -911,21 +912,21 @@ Note: The notation for identifying the resources for subscription are for
 
 ~~~~
 
-                            sub: acme.tv/brodcasts/channel8/alice/sd
-                                                     .─────.
-                                             ┌──────(  S1   )
-                                             │       `─────'
-                                             │
-   sub: acme.tv/broadcasts/channel8/alice/4k |
-   sub: acme.tv/brodcasts/channel8/alice/sd  |
-   sub: acme.tv/brodcasts/channel8/alice/hd  |
-       │                                     |
-┌──────────────┐          ┌──────────────┐   │
-│              │          │              │   | sub: acme.tv/brodcasts/
-|              |          |              |   |      channel8/alice/4k
-│   Ingest     │ ◀────────|  edge       │◀──┘  .─────.
+                          sub: acme.tv/brodcasts/channel8/alice/sd
+                                                    .─────.
+                                            ┌──────(  S1   )
+                                            │       `─────'
+                                            │
+   sub: acme.tv/broadcasts/channel8/alice/4 |
+   sub: acme.tv/brodcasts/channel8/alice/sd |
+   sub: acme.tv/brodcasts/channel8/alice/hd |
+       │                                    |
+┌──────────────┐          ┌──────────────┐  │
+│              │          │              │  |sub: acme.tv/brodcasts/
+|              |          |              |  |     channel8/alice/4k
+│   Ingest     │ ◀────────| Relay-Edge   │◀─┘   .─────.
 │              │          │              │◀────(  S2   )
-└──────▲───────          └───────────────◀──|   `─────'
+└──────▲───────           └────────────── ◀──|   `─────'
        │                                     │     ◉
        │                                     │     ◉
     .─────.                                  │     ◉
