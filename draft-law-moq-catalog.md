@@ -29,13 +29,21 @@ author:
     email: snandaku@cisco.com
 
 normative:
+MOQTransport:
+    target: https://www.ietf.org/archive/id/draft-nandakumar-moq-transport-00.txt
+    title: "MoQ Transport (moqt) - Unified Media Delivery Protocol over QUIC"
+    date: 2023-03-13
+    author:
+       - name: Suhas Nandakumar
+       - name: Christian Huitema
+       - name: Will Law
 
 informative:
 
 
 --- abstract
 
-This document defines core requirements for a Catalog specification for container streaming formats for delivery of media over QUIC and interoperable with other Catalog definitions.
+This document defines an interoperable Catalog specification for streaming formats implementing the MoQ Base Protocol.
 
 --- middle
 
@@ -54,7 +62,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
  - MoQ Base Protocol (MBP) - a media transport protocol that utilizes the QUIC network protocol [QUIC] and WebTransport[WebTrans] to move objects between publishers, subscribers and intermediaries
  - MoQ Streaming Format - a specification which defines how to stream media over the MoQ Base Protocol. It includes a catalog definition, a mapping of media to the protocol objects, prioritization rules and additional business logic.
  - Track - a sequence of Objects within MBP
- - Track ID - a combination of globally uniqe provider identifier and a "Track Name" which is a string used to identify a Track.
+ - Track ID - a string concatenation of a globally unique provider identifier and a "Track Name".
 
 # Catalog
 

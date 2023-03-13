@@ -48,14 +48,14 @@ One ambition of MoQ is to define a single QUIC based transport for multiple tran
 
 ## Streaming Scenarios
 
-This section few scenarios for streaming use-cases. The scenarios listed are not exhaustive and doesn't intend to capture all possible application and architectures.
+This section dicusses few scenarios for streaming use-cases. The scenarios listed are not exhaustive and doesn't intend to capture all possible applications and architectures.
 
 Streaming scenarios typically separate "content ingestion" and "content distribution". Content is provided by one or several "emitters". Streaming scenarios typically
-operate with latency profile between 500 ms - 2 ms for live streaming use-cases.
+operate with latency profile between 500 ms - 2s for live streaming use-cases.
 
 ## Live Video Ingestion
 
-In a typical live video ingestion, the broascast client - like OBS client,
+In a typical live video ingestion, the broadcast client - like OBS client,
 publishes the video content to an ingest server under a provider domain
 (say twicth.com)
 
@@ -70,9 +70,8 @@ publishes the video content to an ingest server under a provider domain
 
 ~~~
 
-The Track IDs are scoped to the broadcast under the provider and
-may not need to have scope beyond that.
-
+The Track IDs are scoped to the broadcast for the application under
+a provider domain.
 
 ## Live Streaming
 
@@ -87,10 +86,10 @@ over a content distribution network.
 In this setup, one can imagine the ingestion and
 distribution as 2 separate systems operating
 under a given provider domain,  where the
-track names used by the emitter need not match
-the names referrred to by the subscribers.
+track Ids used by the emitter need not match
+the ones referred to by the subscribers.
 The reason being, the distribution server sources
-the new tracks.
+the new tracks (possibly transcoded)
 
 ~~~
 
@@ -112,43 +111,43 @@ the new tracks.
 ~~~
 
 
-## Conferencing Scenarios - Classic
+## Interactivr Usecases
 
-A interactive conference typically works under the
+A interactive conference typically works with the expected
 operating glass-to-glass latency to be around 200ms and is made up
 of multiplcitiy of participant with varying capabilities
 and operating under varying network conditions.
 
 A typical conferencing session comprises of:
 
-- Mutiple emitters, publishing on multiple tracks (audio, video tracks at different qualities)
+- Mutiple emitters, publishing on multiple tracks (audio, video tracks and at different qualities)
 
 - A media switch, sourcing tracks that represent a subset of tracks from across all
   the emitters. Such subset may represent tracks representing top 5 speakers at
-  higher qualities and lot of tracks for rest of the emitters at lower qualities.
+  higher qualities and lot of other tracks for rest of the emitters at lower qualities.
 
 - Multiple receivers, with varied receiving capacity (bandwidth limited), subscribing to subset of the tracks
 
 
 ~~~
                                    SFU:t1, E1:t2, E3:t6
- .───.  E1: t1,t2,t3,t4                           .───.
-( E1  )─────┐                            ┌────▶ ( S1  )
- `───'      │                           │         `───'
+ .───.  E1: t1,t2,t3,t4                          .───.
+( E1  )─────┐                           ┌────▶ ( R1  )
+ `───'      │                           │       `───'
             │                           │
             └───────▶─────────┐         │
                      │         │────────┘
- .───.  E2: t1,t2    │   SFU   │   SFU:t1,E1:t2  .───.
-( E2  )─────────────▶│         │──────────────▶( S2  )
- `───'               │         │                 `───'
+ .───.  E2: t1,t2    │   SFU   │   SFU:t1,E1:t2 .───.
+( E2  )─────────────▶│         │──────────────▶( R2  )
+ `───'               │         │                `───'
            ┌────────▶└─────────┴─────────┐
            │                             │
            │                             │
            │                             │
            │                             │
  .───.     │                             │       .───.
-( E3  )────┘                             └─────▶( S3  )
- `───'   E3: t1,t2,t3,t4,t5,t6          E3: t2,   `───'
+( E3  )────┘                             └─────▶( R3  )
+ `───'   E3: t1,t2,t3,t4,t5,t6          E3: t2,  `───'
                                         E1: t2,
                                         E2: t2,
                                         SFU: t1
@@ -160,53 +159,56 @@ Above setup brings in following properties on the data model for the
 transport protocol
 
 - Media Switches to source new tracks but retain media payload from
-  the original emitters. This implies new Track IDs sourced from the
-  SFU, with object payload unchanged from the original emitters.
+  the original emitters. This implies publishing new Track IDs
+  sourced from the SFU, with object payload unchanged from the
+  original emitters.
 
 - Media Switches to propogate subset of tracks as-is from the emitters
-  to the subscribers. This implies Track IDs to be scoped end to end.
+  to the subscribers. This implies Track IDs to be unchanged between
+  the emitters and the receivers.
 
 - Subscribers to explictily request multiple appropriate qualities and
   dynamically move between the qualtiies during the course of the session
 
-Another evolving topology for the interactive use-case is to use
-multiple distribution networks for delivering the media and thus move
-media switching functionality from purpose built SFUs to the
+Another topology for the interactive use-case is to use
+multiple distribution networks for delivering the media, with
+thus media switching functionality running across disrtibution
+networks and also moving these media functions to the
 core distribution network as shown below
 
 ~~~
                    Distribution Network A
- E1: t1,t2,t3,t4              
+ E1: t1,t2,t3,t4
                                     SFU:t1, E1:t2, E3:t6
-    .───.        ┌────────┐      ┌────────┐       .───.
-   ( E1  )───────│ Relay  │──────│ Relay  ├───▶ ( S1  )
-    `───'        └─────┬──┘      └──┬─────┘       `───'
+    .───.        ┌────────┐      ┌────────┐      .───.
+   ( E1  )───────│ Relay  │──────│ Relay  ├───▶ ( R1  )
+    `───'        └─────┬──┘      └──┬─────┘      `───'
                        │ ┌────────┐ │
    E2: t1,t2           └─┤ Relay  │─┘
              ┌──────────▶└────┬───┘         SFU:t1,E1:t2
-    .───.    │                 │                   .───.
-   ( E2  )───┘                 │              ┌─▶( S2  )
-    `───'                      │              │    `───'
+    .───.    │                 │                  .───.
+   ( E2  )───┘                 │              ┌─▶( R2  )
+    `───'                      │              │   `───'
                    ┌────────┐  │   ┌────────┬─┘
              ──────┤ Relay  │──┴───│ Relay  │─┐
              |     └─────┬──┘      └──┬─────┘ │
              |           │ ┌────────┐ │       │
              |           └─┤ Relay  │─┘       │
-    .───.    |             └────────┘         │    .───.
-   ( E3  )───┘         Distribution Network B └─▶( S3  )
-    `───'                                          `───'
+    .───.    |             └────────┘         │   .───.
+   ( E3  )───┘         Distribution Network B └─▶( R3  )
+    `───'                                         `───'
      E3: t1,t2,t3,t4,t5,t6                        E3: t2,
                                                   E1: t2,
                                                   E2: t2,
                                                  SFU: t1
 ~~~
 
-Such a topology needs to meet all the properties listed in a classic
-style setup, however having multiple distribution networks
+Such a topology needs to meet all the properties listed in the
+homogenous topology setup, however having multiple distribution networks
 and relying on the distribution networks to carryout the media delivery,
-brins in further towards a data model that enables tracks to be uniquely
-identifiable across the distribution networks and not just within a
-single distribution network.
+brings in further requirements towards a data model that enables tracks
+to be uniquely identifiable across the distribution networks and not
+just within a single distribution network.
 
 # Scenario differences
 
@@ -248,13 +250,6 @@ same group must be dropped. If the group duration is long, this means that the q
 of experience may be lowered for a long time after a brief congestion. If the group
 duration is short, this can produce a jarring effect in which the quality
 of experience drops perdiodically at the tail of the group.
-
-# Unit of grouping tracks
-
-Two views:
-
-*  Emission (non conferencing)
-*  Multiple Emissions and their tracks into one container (conferencing A/B)
 
 # Handling Scalable Video Codecs
 

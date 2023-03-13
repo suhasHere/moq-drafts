@@ -26,6 +26,13 @@ author:
    org: Private Octopus Inc.
    email: huitema@huitema.net
 
+-
+   ins: W. Law
+   name: Will Law
+   org: Akamai
+   email: wilaw@akamai.com
+
+
 --- abstract
 
 This specification defined MoqTransport (moqt), an unified media
@@ -87,12 +94,12 @@ with minimal impact to the clients and relays can redirect a
 client to a different relay.
 
 ## Terms and definitions
-  
-The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", 
-"SHOULD", 
-"SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in 
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+"SHOULD",
+"SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in
 this
-document are to be interpreted as described in BCP 14 {{!RFC2119}} 
+document are to be interpreted as described in BCP 14 {{!RFC2119}}
 {{!RFC8174}}
 when, and only when, they appear in all capitals, as shown here.
 
@@ -108,14 +115,18 @@ Commonly used terms in this document are described below:
 
 * Emitter: Authorized entities that participate in a MoQTransport
   Session under an Provider. Emitters are trusted with E2E encryption
-  keys for the media and operate on one or more
-  Source Streams {{Section 2.1.5 of RFC7656}}. They perform media
-  encoding transform, thus transforming a given source stream into
-  one or more representations, usually more compact, known as
-  Encoded Streams {{Section 2.1.7 of RFC7656}}. They further transform
-  the encoded stream into Encrypted Stream. Each such encoded and/or
-  encrpyted stream corresponds to a Track within the MoQ transport protocol.
+  keys. They  operate on one or more uncompressed
+  media inputs, compress and possible encrypt it and send over
+  Data Streams. Each such encoded and/or
+  encrpyted stream corresponds to a Track within the MoQTransport.
 
+* Catalog Maker: Entities performing Catalog Maker role compose or
+  aggregate tracks from multiple emissions to form a new emission.
+  Akin to the role of entities with the Relay role, Catalog Maker
+  role entities are not trusted with the E2E keys and they perform
+  publisher and subscriber roles. Catalog Makers are allowed to
+  publish tracks with a new name without changing the media
+  content of the received tracks.
 
 * Control Stream: QUIC Stream to exchange control
   message to setup appropriate context for media delivery
@@ -124,7 +135,7 @@ Commonly used terms in this document are described below:
   setting up media properties and starting/terminating
   media sessions.
 
-* Data Stream: QUIC Stream based transport for delivering
+* Data Stream: QUIC Stream or QUIC Datagram based transport for delivering
   end to end encrypted application media objects. Such objects
   shall carry metadata (unencrypted) for Relays to make
   store/forwarding decisions along with the application payload.
@@ -139,12 +150,13 @@ enabling media delivery over QUIC.
 
 Tracks form the central concept within the MoQ Transport
 protocol for delivering media. A Track identifies the namespace
-and the authorization scope under which MoQ Media objects
+and the authorization scope under which MoQTransport objects
 {{objects}} are delivered.
 
-A track is a transform of a Source Media Stream {{!RFC7656}} using a
+A track is a transform of a uncompresss media using a
 specific encoding process, a set of parameters for
 that encoding, and possibly an encryption process.
+
 The MoQTransport is designed to transport tracks.
 
 Tracks have the following properties:
@@ -159,7 +171,8 @@ Tracks have the following properties:
 Tracks are identified by a globally unique identifier,
 called "Track ID". Track ID MUST identify its owning provider
 by a standardized identifier, such as domain name or equivalent,
-then followed by the application context specific "Track Name".
+then followed by the application context specific "Track Name",
+encoded a opaque string.
 
 
 ## Objects {#objects}
@@ -172,7 +185,7 @@ An Object MUST belong to a group {{groups}}
 Few examples include, for video media an object could
 be an H.264 P frame or could be just a single slice from
 inside the P Frame. For audio media, it could be a
-single audio frame.
+single audio frame. Or a catalog payload.
 
 Objects are not partially decodable. The end to end
 encryption and authentication operations are performed
@@ -191,9 +204,9 @@ on the strict priority order {{priority}}
 ## Object Groups {#groups}
 
 An Object MUST belong to a group. Groups are composition of
-objects and they carry the necessary dependecy information
-needed to process the objects in the group. Objects that
-carry information required to resolve dependecies are
+objects and the objects within the group carry the necessary
+dependecy information needed to process the objects in the group.
+Objects that carry information required to resolve dependencies are
 marked appropriately in their headers. In cases where such
 information MAY NOT be available, the first object in the
 group MUST have all the dependency information needed to
@@ -226,7 +239,7 @@ Few example of Emissions include,
 
  - Collection of audio and video tracks that makes up
    a broadcast for a live stream by OBS client,
-   the Emitter, to provider, say Twitch.
+   the Emitter, to the provider, say Twitch.
 
 -  Tracks from different participants (emitters) in
    a interactive video conference
@@ -234,7 +247,7 @@ Few example of Emissions include,
 
 ## Catalog {#catalog}
 
-Catalog is a MOQ Object scoped to a MoQSession {{session}} that
+Catalog is a MOQ Object scoped to a MoQ Session {{session}} that
 provides information about tracks from one of more Emissions and
 is used by the subscribers for consuming tracks and for publishers
 to advertise the tracks. The content of "Catalog" is opaque to the
@@ -255,8 +268,9 @@ Media delivery is started by the publisher/subscriber setting
 up a "Control Stream" for one or more Tracks. The control stream,
 which is based on QUIC stream, is used to configure and setup properties for
 the "Data Stream". Track media objects is delivered over one or more
-"Data Streams" which are unidirectional QUIC streams.
-The Control Channel can also be used to configure in-session parameters.
+"Data Streams" which can be  unidirectional QUIC streams or over QUIC
+Datagrams. The Control Channel can also be used to configure
+in-session parameters.
 
 ## Control Stream and Messages
 
@@ -342,7 +356,7 @@ active until one of the following happens
 
 The `subscribe` message is sent over the associated control
 stream and the same is closed when the subscriptions for
-the tracks includes are no longer required. This implies
+the tracks included are no longer required. This implies
 the termination of all associated data streams.
 
 #### Aggregating Subscriptions
@@ -487,7 +501,8 @@ or publishes to.
 
 ### Catalog Message {#catalog-message}
 
-TODO Add details
+Catalog message provides information on tracks for a given
+MoQ Session.
 
 ~~~
 catalog {
@@ -497,7 +512,8 @@ catalog {
 }
 ~~~
 
-The message_type is set to CATALOG (6).
+The message_type is set to CATALOG (6). `data` is container specific
+encoding of catalog information.
 
 ## Stream Considerations {#stream-considerations}
 
@@ -581,7 +597,7 @@ were sent in the previous group. It enables the receiver to check
 whether all these objects have been received.
 
 The `flags` field is used to maintain low latency by selectively
-dropping objects in case of congestion. 
+dropping objects in case of congestion.
 The flags field is encoded as:
 
 ~~~
@@ -593,23 +609,14 @@ The flags field is encoded as:
 
 ## Datagram considerations {#datagrams}
 
-MoQ objects can be transmitted as datagrams, if the datagram transmission
+MoQ objects can be transmitted as QUIC datagrams, if the datagram transmission
 option has been validated during the subscribe or publish transaction.
+Such a option is chosen for non-relaible media delivery scenarios.
 
 When sent as datagrams, the object is split into a set of fragments. Each
 fragment is sent as a separate datagram. The fragment header contains enough
 information to enable reassembly. If the complete set of fragments is not
 received in a reasonable time, the whole object shall be considered lost.
-
-QUIC does not guarantee the reliable delivery of datagrams. Nodes SHOULD only
-opt to send fragments as datagrams if they can implement a reliable
-delivery mechanism, such as using QUIC acknowledgements to infer whether the
-QUIC packet containing the datagram frame was acknowledged or is considered
-lost, and resending lost fragments as appropriate.
-
-Some WebTransport stacks do not guarantee that datagrams acknowledged at the
-QUIC level are actually delivered through the WebTransport Datagram API.
-MoQ nodes using such stacks MUST NOT enable transmission of objects as datagrams.
 
 ### Fragment Message
 
@@ -632,7 +639,7 @@ fragment {
 
 The message type will be set to FRAGMENT (13). The optional fields
 `media_id`, `group_id` and `object_id` are provided in the cases
-where they can be obtained from the context where the `fragment`
+where they cannot be obtained from the context where the `fragment`
 message is published. For typical cases, the `group_header`
 and the `object_header` messages preceed the series of `fragment`
 messages and thus provide the necessary context to tie the
@@ -700,7 +707,7 @@ decisions on two propertes of objects:
 * a "drop-priority" value, which indicates the relative priority of this
   object versus other objects in the track or other tracks in the connection.
 
-Higher values of the dro-priority field indicate higher drop priorities: objects
+Higher values of the drop-priority field indicate higher drop priorities: objects
 mark with priority 0 would be the last to be dropped, objects marked with
 priority 3 would be dropped before dropping objects with priority 2, etc. Nodes
 support up to 8 drop-priority levels, numbered 0 to 7.
@@ -783,9 +790,6 @@ must be consistent with the encoding requirements, making sure that:
 
 * objects can only have encoding dependencies on other objects in the
   same group,
-
-* objects can only have encoding dependencies on other objects with lower
-  sequence numbers
 
 * objects can only have encoding dependencies on other objects with equal or
   or numerically lower priority levels.
@@ -887,9 +891,8 @@ different relay.
 
 Let’s consider the example as show in the picture below, where a large number of
 subscribers are interested in media streams from the publisher Alice. In this scenario,
-the publisher Alice has a live brodcast on channel8 with video streams at 
-3
-different quality (HD, 4K and SD)
+the publisher Alice has a live brodcast on channel8 with video streams at
+3 different quality (HD, 4K and SD)
 
 More specifically,
 
@@ -1023,7 +1026,7 @@ datagrams, all multiplexed within the same HTTP/3 connection.
 Clients (publishers and subscribers) setup WebTransport Session
 via HTTP CONNECT request for the application provided MoQSession and
 provide the necessary authentication information
-(in the form of authentication token). The ":protocol" value 
+(in the form of authentication token). The ":protocol" value
 indicates use of MoQ. For versions implementing
 this draft, the :protocol value is set to "moq-n00".
 
@@ -1048,7 +1051,7 @@ Catalog objects are retrieved by subscribing to its TrackID over
 its own control channel and the TrackID is formed as shown below
 
 ~~~
-Catalog TrackID :=&lt;provider-domain>/%lt;moq-session-id>/catalog
+Catalog TrackID :=<provider-domain>/<moq-session-id>/catalog
 
 Ex: streaming.com/emission123/catalog
 ~~~
@@ -1074,6 +1077,10 @@ can choose to use the same WebTransport session or multiple of
 them to perform the track subscriptions based on the application
 requirements.
 
+Also, It is typical for certain applications to group set of tracks
+in to a single prioritization relationship and transmit
+them over a single WebTransport Session.
+
 Tracks subscription is done by sending `subscribe` message
 as definedin {{subscribe}}
 
@@ -1088,7 +1095,7 @@ be reported to the application.
 
 ### Publishing Media
 
-On successful setup of the WebTranport session,
+On successful setup of the WebTransport session,
 publishers send `publish_request` message listing the tracks
 they intend to publish data on. Publisher MUST be
 authorized to publish on the tracks and Relays MUST
@@ -1100,27 +1107,6 @@ on the tracks advertised.
 
 Publishing objects on the tracks follow the procedures
 defined in {{stream-considerations}} and {{datagrams}}.
-
-
-## MoQTransport over QUIC
-
-MoQTransport can be used to deliver media over raw QUIC.
-This document describes version "0.1" of the MoQTransport protocol,
-negotiated using ALPN "moqt-01"
-
-TODO Fill this section.
-
-
-# Security and Privacy Considerations
-
-TODO: fill this section.
-
-
-# IANA Considerations
-
-TODO: fill this section. Register ALPN. Register WebTransport protocol.
-Open new registry for MoQ message types. Possibly, open registry for
-MoQ errors.
 
 
 --- back
@@ -1135,7 +1121,9 @@ This section needs more work
 
 # IANA Considerations {#iana}
 
-This specification doesn't propose any changes to IANA.
+TODO: fill this section. Register ALPN. Register WebTransport protocol.
+Open new registry for MoQ message types. Possibly, open registry for
+MoQ errors.
 
 # References
 
@@ -1151,15 +1139,15 @@ This specification doesn't propose any changes to IANA.
              RFC 8126, DOI 10.17487/RFC8126, June 2017,
              %gt;https://www.rfc-editor.org/info/rfc8126>.
 
-  \[QUIC\]    Iyengar, J., Ed. and M. Thomson, Ed., "QUIC: A UDP-Based 
+  \[QUIC\]    Iyengar, J., Ed. and M. Thomson, Ed., "QUIC: A UDP-Based
 Multiplexed and Secure Transport",
             RFC 9000, DOI 10.17487/RFC9000, May 2021,
             %gt;https://www.rfc-editor.org/rfc/rfc9000>.
 
-  \[WebTransport\]    Frindell, A., Kinnear, E., and V. Vasiliev, 
+  \[WebTransport\]    Frindell, A., Kinnear, E., and V. Vasiliev,
 "WebTransport over HTTP/3",
                     Work in Progress, Internet-Draft, draft-ietf-webtrans-http3-04, 24 January 2023,
-                    
+
 &gt;https://datatracker.ietf.org/doc/html/draft-ietf-webtrans-http3-04>.
 
 # Acknowledgments
