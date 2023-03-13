@@ -86,7 +86,17 @@ implement relays so that fail over could happen between relays
 with minimal impact to the clients and relays can redirect a
 client to a different relay.
 
-# Terminology
+## Terms and definitions
+  
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", 
+"SHOULD", 
+"SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in 
+this
+document are to be interpreted as described in BCP 14 {{!RFC2119}} 
+{{!RFC8174}}
+when, and only when, they appear in all capitals, as shown here.
+
+Commonly used terms in this document are described below:
 
 * Provider/Origin: Entity capable of hosting media application
   session based on the MoQTransport. It is responsible for
@@ -99,10 +109,10 @@ client to a different relay.
 * Emitter: Authorized entities that participate in a MoQTransport
   Session under an Provider. Emitters are trusted with E2E encryption
   keys for the media and operate on one or more
-  Source Streams (Section 2.1.5 of [!@RFC7656]). They perform media
+  Source Streams {Section 2.1.5 of RFC7656}. They perform media
   encoding transform, thus transforming a given source stream into
   one or more representations, usually more compact, known as
-  Encoded Streams (Section 2.1.7 of [!RFC7656]). They further transform
+  Encoded Streams {Section 2.1.7 of RFC7656}. They further transform
   the encoded stream into Encrypted Stream. Each such encoded and/or
   encrpyted stream corresponds to a Track within the MoQ transport protocol.
 
@@ -132,7 +142,7 @@ protocol for delivering media. A Track identifies the namespace
 and the authorization scope under which MoQ Media objects
 {objects} are delivered.
 
-A track is a transform of a Source Media Stream [@!RFC7656] using a
+A track is a transform of a Source Media Stream {{!RFC7656}} using a
 specific encoding process, a set of parameters for
 that encoding, and possibly an encryption process.
 The MoQTransport is designed to transport tracks.
@@ -266,12 +276,12 @@ be different control streams for sending and receiving.
 The control channel carry series of messages, encoded as a length followed
 by a message value:
 
-```
+~~~
 message {
     length(16),
     value(...)
 }
-```
+~~~
 
 The length is encoded as a 16 bit number in big endian network order.
 
@@ -284,7 +294,7 @@ this specification.
 Entities that intend to receive media will do so via
 subscriptions to one or more Tracks.
 
-```
+~~~
 enum subscribe_intent
 {
   immediate(0),
@@ -303,7 +313,7 @@ subscribe_message {
   tracks_length(i),
   track_info tracks (...),
 }
-```
+~~~
 
 The message type will be set to SUBSCRIBE (1). `tracks` identifies the
 list of tracks as defined by the `track_info` type.
@@ -351,7 +361,7 @@ behind a Relay or the provider.
 A `subscribe_reply` provides results of the subscription and is sent
 on the control stream over which the `subscribe` control message was received.
 
-```
+~~~
 enum response
 {
   ok(0),
@@ -363,9 +373,9 @@ track_response {
   Response response,
   track_id_length(i),
   track_id(...)...,
-  [Reason Phrase Length (i)],
-  [Reason Phrase (...)],
-  [media_id(i)]
+  \[Reason Phrase Length (i)\],
+  \[Reason Phrase (...)\],
+  \[media_id(i)\]
 }
 
 subscribe_reply
@@ -373,7 +383,7 @@ subscribe_reply
   message_type(i),
   track_response tracks(...)
 }
-```
+~~~
 
 The message type will be set to SUBSCRIBE\_REPLY (2). `tracks` capture
 the result of subscription per track included in the `subscribe` message.
@@ -404,7 +414,7 @@ any point by sending a new `subscribe_message`.
 The `publish_request` message provides one or more
 tracks that the publisher intends to publish data.
 
-```
+~~~
 track_info {
   track_id_length(i),
   track_id(...)...,
@@ -415,7 +425,7 @@ publish_request {
   message_type(i),
   track_info tracks(...),
 }
-```
+~~~
 
 The message type will be set to PUBLISH\_REQUEST (3).
 `tracks` identifies the list of tracks. The `media_id` represents
@@ -440,12 +450,12 @@ on the track(s) in the `publish_request`. The `publish_reply`
 control message is sent over the same control stream the
 request was received on.
 
-```
+~~~
 publish_reply {
   message_type(i),
   track_response tracks(...),
 }
-```
+~~~
 
 The message_type is set to PUBLISH\_REPLY (4).
 
@@ -462,30 +472,30 @@ indicate relay failover scenarios. This message is sent on
 all the control streams that would be impacted by reduced
 operations of the Relay.
 
-```
+~~~
 relay_redirect
 {
   message_type(i),
   relay_address_length(i),
   relay_address(...)...
 }
-```
+~~~
 
 The message_type is set to RELAY\_REDIRECT (5). `relay_address`
 identifies the address of the relay to setup the new subscriptions
 or publishes to.
 
-### Catalog Message {#catalog}
+### Catalog Message {#catalog-message}
 
 TODO Add details
 
-```
+~~~
 catalog {
   message_type(i),
   catalog_length(i),
   data(...)...
 }
-```
+~~~
 
 The message_type is set to CATALOG (6).
 
@@ -498,12 +508,12 @@ followed for each object in the group by an "object header"
 specifying the object ID and the object length and then the content
 of the objects (as depicted below)
 
-```
+~~~
 +--------+------------+-------+------------+-------+------
 | Group  | Object     | Bytes | Object     | Bytes |
 | header | header (0) |  (0)  | header (1) |  (1)  | ...
 +--------+------------+-------+------------+-------+------
-```
+~~~
 
 The first object in the stream is object number 0, followed by 1, etc.
 Arrival of objects out of order will be treated as a protocol error.
@@ -517,12 +527,12 @@ will start with a "group header" message specifying the
 media ID and the group ID, followed by a single "object header"
 and then the content of the objects (as depicted below).
 
-```
+~~~
 +--------+------------+-------+
 | Group  | Object     | Bytes |
 | header | header (n) |  (n)  |
 +--------+------------+-------+
-```
+~~~
 
 The MOQTransport doesn't enforce a rule to follow for the applications,
 but instead aims to provide tools for the applications to make
@@ -532,13 +542,13 @@ the choices appropriate for their use-cases.
 
 The group header message is encoded as:
 
-```
+~~~
 group_header {
   message_type(i),
   media_id(i),
   group_id(i)
 }
-```
+~~~
 
 The message type is set to GROUP_HEADER, 11. `media_id` MUST correspond
 to the one that was setup as part of `publish_request` control
@@ -551,7 +561,7 @@ increases sequentially at the original media publisher.
 Each object in the stream is encoded as an Object header, followed by
 the content of the object. The Object header is encoded as:
 
-```
+~~~
 object_header {
   message_type(i),
   object_id(i),
@@ -559,7 +569,8 @@ object_header {
   flags[8],
   object_length(i)
 }
-```
+~~~
+
 The message type is set to OBJECT_HEADER, 12. `object_id` is identified
 by a sequentially increasing integer, starting at 0.
 
@@ -572,12 +583,12 @@ whether all these objects have been received.
 The `flags` field is used to maintain low latency by selectively
 dropping objects in case of congestion. 
 The flags field is encoded as:
-```
+~~~
 {
     maybe_dropped(1),
     drop_priority(7)
 }
-```
+~~~
 
 ## Datagram considerations
 
@@ -604,7 +615,7 @@ MoQ nodes using such stacks MUST NOT enable transmission of objects as datagrams
 In the datagram variants, instead of sending a series of whole objects
 on a stream, objects are sent as series of fragments, using the
 Fragment message:
-```
+~~~
 fragment {
   message_type(i),
   [media_id(i)],
@@ -615,7 +626,7 @@ fragment {
   fragment_length(i),
   data(...)
 }
-```
+~~~
 
 The message type will be set to FRAGMENT (13). The optional fields
 `media_id`, `group_id` and `object_id` are provided in the cases
@@ -651,12 +662,12 @@ dropping objects in case of congestion. The value must be the same
 for all fragments belonging to the same object.
 
 The flags field is encoded as:
-```
+~~~
 {
     maybe_dropped(1),
     drop_priority(7)
 }
-```
+~~~
 
 The high order bit `maybe_dropped` indicates whether the object can be dropped. The `drop_priority` allows nodes to selectively drop objects. Objects with the highest priority as dropped first.
 
@@ -873,7 +884,8 @@ different relay.
 
 Let’s consider the example as show in the picture below, where a large number of
 subscribers are interested in media streams from the publisher Alice. In this scenario,
-the publisher Alice has a live brodcast on channel8 with video streams at 3
+the publisher Alice has a live brodcast on wchannel8 with video streams at 
+3
 different quality (HD, 4K and SD)
 
 More specifically,
@@ -910,9 +922,10 @@ Note: The notation for identifying the resources for subscription are for
 ┌──────────────┐          ┌──────────────┐   │
 │              │          │              │   | sub: acme.tv/brodcasts/
 |              |          |              |   |        channel8/alice/4k
-│   Ingest     │ ◀────────┤  Relay-Edge  │◀─┘     .─────.
+│   Ingest     │ ◀────────e  │◀─┘     
+.─────.
 │              │          │              │◀───────(  S2   )
-└──────▲───────┘          └──────────────┘◀────┐  `─────'
+└──────▲──────────────––––   `─────'
        │                                        │     ◉
        │                                        │     ◉
     .─────.                                     │     ◉
@@ -922,8 +935,8 @@ pub: acme.tv/broadcasts/channel8/alice/hd       └──(  SN   )
 pub: acme.tv/broadcasts/channel8/alice/sd           `─────'
 pub: acme.tv/broadcasts/channel8/alice/4k
 
-                                  sub: acme.tv/brodcasts/channel8/alice/sd
-                                  sub: acme.tv/brodcasts/channel8/alice/hd
+                              sub: acme.tv/brodcasts/channel8/alice/sd
+                              sub: acme.tv/brodcasts/channel8/alice/hd
 
 ~~~~
 
@@ -1032,11 +1045,11 @@ Catalogs are identifed as a special track, with its track name as "catalog".
 Catalog objects are retrieved by subscribing to its TrackID over
 its own control channel and the TrackID is formed as shown below
 
-```
-Catalog TrackID := <provider-domain>/<moq-session-id>/catalog
+~~~
+Catalog TrackID :=&lt;provider-domain>/%lt;moq-session-id>/catalog
 
 Ex: streaming.com/emission123/catalog
-```
+~~~
 
 A successfull subscription will lead to one or more catalog
 objects being published on a single unidirectional data stream.
@@ -1126,28 +1139,26 @@ This specification doesn't propose any changes to IANA.
 
 ## Normative References
 
-  [RFC XXX]   Nandakumar, S "MoQ Base Protocol"
+  \[RFC XXX\]   Nandakumar, S "MoQ Base Protocol"
               Work in progress
-
-  [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
-             Requirement Levels", BCP 14, RFC 2119,
-             DOI 10.17487/RFC2119, March 1997,
-             <https://www.rfc-editor.org/info/rfc2119>.
 
 ## Informative references
 
-  [RFC8126]  Cotton, M., Leiba, B., and T. Narten, "Guidelines for
+  \[RFC8126\]  Cotton, M., Leiba, B., and T. Narten, "Guidelines for
              Writing an IANA Considerations Section in RFCs", BCP 26,
              RFC 8126, DOI 10.17487/RFC8126, June 2017,
-             <https://www.rfc-editor.org/info/rfc8126>.
+             %gt;https://www.rfc-editor.org/info/rfc8126>.
 
-  [QUIC]    Iyengar, J., Ed. and M. Thomson, Ed., "QUIC: A UDP-Based Multiplexed and Secure Transport",
+  \[QUIC\]    Iyengar, J., Ed. and M. Thomson, Ed., "QUIC: A UDP-Based 
+Multiplexed and Secure Transport",
             RFC 9000, DOI 10.17487/RFC9000, May 2021,
-            <https://www.rfc-editor.org/rfc/rfc9000>.
+            %gt;https://www.rfc-editor.org/rfc/rfc9000>.
 
-  [WebTransport]    Frindell, A., Kinnear, E., and V. Vasiliev, "WebTransport over HTTP/3",
+  \[WebTransport\]    Frindell, A., Kinnear, E., and V. Vasiliev, 
+"WebTransport over HTTP/3",
                     Work in Progress, Internet-Draft, draft-ietf-webtrans-http3-04, 24 January 2023,
-                    <https://datatracker.ietf.org/doc/html/draft-ietf-webtrans-http3-04>.
+                    
+&gt;https://datatracker.ietf.org/doc/html/draft-ietf-webtrans-http3-04>.
 
 # Acknowledgments
 
