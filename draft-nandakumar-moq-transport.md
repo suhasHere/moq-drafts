@@ -591,7 +591,7 @@ The flags field is encoded as:
 }
 ~~~
 
-## Datagram considerations
+## Datagram considerations {#datagrams}
 
 MoQ objects can be transmitted as datagrams, if the datagram transmission
 option has been validated during the subscribe or publish transaction.
@@ -1098,7 +1098,7 @@ on the tracks advertised.
 
 
 Publishing objects on the tracks follow the procedures
-defined in {{data}} and {{stream-considerations}}.
+defined in {{stream-considerations}} and {{#datagrams}}.
 
 
 ## MoQTransport over QUIC
