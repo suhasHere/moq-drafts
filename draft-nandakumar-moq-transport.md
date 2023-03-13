@@ -912,7 +912,7 @@ Note: The notation for identifying the resources for subscription are for
 
 ~~~~
 
-                          sub: acme.tv/brodcasts/channel8/alice/sd
+                     sub: acme.tv/brodcasts/channel8/alice/sd
                                                     .─────.
                                             ┌──────(  S1   )
                                             │       `─────'
@@ -920,24 +920,24 @@ Note: The notation for identifying the resources for subscription are for
    sub: acme.tv/broadcasts/channel8/alice/4 |
    sub: acme.tv/brodcasts/channel8/alice/sd |
    sub: acme.tv/brodcasts/channel8/alice/hd |
-       │                                    |
-┌──────────────┐          ┌──────────────┐  │
-│              │          │              │  |sub: acme.tv/brodcasts/
-|              |          |              |  |     channel8/alice/4k
+       │                                    | sub: acme.tv/
+┌──────────────┐          ┌──────────────┐  │      broadcasts/
+│              │          │              │  |      channel8/
+|              |          |              |  |      alice/4k
 │   Ingest     │ ◀────────| Relay-Edge   │◀─┘   .─────.
 │              │          │              │◀────(  S2   )
-└──────▲───────           └────────────── ◀──|   `─────'
+└──────▲───────           └────────────── ◀──┐  `─────'
        │                                     │     ◉
        │                                     │     ◉
     .─────.                                  │     ◉
    ( Alice )                                 │
-    `─────'                                  │   .─────.
-pub: acme.tv/broadcasts/channel8/alice/hd    └──(  SN   )
-pub: acme.tv/broadcasts/channel8/alice/sd        `─────'
+    `─────'                                  │  .─────.
+pub: acme.tv/broadcasts/channel8/alice/hd    └─(  SN   )
+pub: acme.tv/broadcasts/channel8/alice/sd       `─────'
 pub: acme.tv/broadcasts/channel8/alice/4k
 
-                            sub: acme.tv/brodcasts/channel8/alice/sd
-                            sub: acme.tv/brodcasts/channel8/alice/hd
+                        sub: acme.tv/brodcasts/channel8/alice/sd
+                        sub: acme.tv/brodcasts/channel8/alice/hd
 
 ~~~~
 
