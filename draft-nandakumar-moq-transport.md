@@ -884,7 +884,7 @@ different relay.
 
 Let’s consider the example as show in the picture below, where a large number of
 subscribers are interested in media streams from the publisher Alice. In this scenario,
-the publisher Alice has a live brodcast on wchannel8 with video streams at 
+the publisher Alice has a live brodcast on channel8 with video streams at 
 3
 different quality (HD, 4K and SD)
 
@@ -910,7 +910,7 @@ Note: The notation for identifying the resources for subscription are for
 
 ~~~~
 
-                                sub: acme.tv/brodcasts/channel8/alice/sd
+                            sub: acme.tv/brodcasts/channel8/alice/sd
                                                      .─────.
                                              ┌──────(  S1   )
                                              │       `─────'
@@ -921,22 +921,21 @@ Note: The notation for identifying the resources for subscription are for
        │                                     |
 ┌──────────────┐          ┌──────────────┐   │
 │              │          │              │   | sub: acme.tv/brodcasts/
-|              |          |              |   |        channel8/alice/4k
-│   Ingest     │ ◀────────e  │◀─┘     
-.─────.
-│              │          │              │◀───────(  S2   )
-└──────▲──────────────––––   `─────'
-       │                                        │     ◉
-       │                                        │     ◉
-    .─────.                                     │     ◉
-   ( Alice )                                    │
-    `─────'                                     │   .─────.
-pub: acme.tv/broadcasts/channel8/alice/hd       └──(  SN   )
-pub: acme.tv/broadcasts/channel8/alice/sd           `─────'
+|              |          |              |   |      channel8/alice/4k
+│   Ingest     │ ◀────────|  edge       │◀──┘  .─────.
+│              │          │              │◀────(  S2   )
+└──────▲───────          └───────────────◀──|   `─────'
+       │                                     │     ◉
+       │                                     │     ◉
+    .─────.                                  │     ◉
+   ( Alice )                                 │
+    `─────'                                  │   .─────.
+pub: acme.tv/broadcasts/channel8/alice/hd    └──(  SN   )
+pub: acme.tv/broadcasts/channel8/alice/sd        `─────'
 pub: acme.tv/broadcasts/channel8/alice/4k
 
-                              sub: acme.tv/brodcasts/channel8/alice/sd
-                              sub: acme.tv/brodcasts/channel8/alice/hd
+                            sub: acme.tv/brodcasts/channel8/alice/sd
+                            sub: acme.tv/brodcasts/channel8/alice/hd
 
 ~~~~
 
