@@ -1,4 +1,3 @@
-
 ---
 title: "Realtime Media Container"
 abbrev: "container"
