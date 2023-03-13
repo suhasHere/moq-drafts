@@ -1,5 +1,5 @@
 ---
-title: "Catalog Specification for MoQ Base Protocol compliant streaming formats"
+title: "Catalog Specification for MoQ compliant streaming formats"
 abbrev: "catalog moq"
 category: info
 
@@ -35,13 +35,13 @@ informative:
 
 --- abstract
 
-This document defines core requirements for a Catalog specification such that it is compliant with the MoQ Base Protocol and interoperable with other Catalog definitions.
+This document defines core requirements for a Catalog specification for container streaming formats for delivery of media over QUIC and interoperable with other Catalog definitions.
 
 --- middle
 
 # Introduction
 
-The MoQ Base Protocol [RFCXXX] defines a media transport protocol that utilizes the QUIC network protocol [QUIC] and WebTransport[WebTrans] to move objects between publishers, subscribers and intermediaries. Subscription IDs are used to identify available tracks.  The mapping of media characteristics to objects, as well as relative prioritization of those objects, is defined by a separate MoQ Streaming Format specification. Multiple streaming formats can operate concurrently over MoQ base protocol. Each streaming format defines its own catalog definition. This document provides normative requirements for these catalog definitions to ensure their compatibility across networks implementing the MoQ Base Protocol.
+The MOQ Base Protocol [MOQTransport] defines a media transport protocol that utilizes the QUIC network protocol [QUIC] and WebTransport[WebTrans] to move objects between publishers, subscribers and intermediaries. Subscription IDs are used to identify available tracks.  The mapping of media characteristics to objects, as well as relative prioritization of those objects, is defined by a separate MoQ Streaming Format specification. Multiple streaming formats can operate concurrently over MoQ base protocol. Each streaming format defines its own catalog definition. This document provides normative requirements for these catalog definitions to ensure their compatibility across networks implementing the MoQ Base Protocol.
 
 # Conventions and Definitions
 
@@ -49,12 +49,12 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 ## Terminology
 
- - Catalog - a Track with a reserved Track ID within an emission that defines the availability of other Tracks.
+ - Catalog - a Track with a reserved Track ID within an emission or MoQSession that defines the availability of other Tracks.
  - Emission - a collection of Tracks under a common prioritization and orchestration domain.
  - MoQ Base Protocol (MBP) - a media transport protocol that utilizes the QUIC network protocol [QUIC] and WebTransport[WebTrans] to move objects between publishers, subscribers and intermediaries
- - MoQ Streaming Format - a specification which defines how to stream media over the MoQ Base Protocol. It includes a catalog definition, a mapping of media to MBP objects, prioritization rules and additional business logic.
+ - MoQ Streaming Format - a specification which defines how to stream media over the MoQ Base Protocol. It includes a catalog definition, a mapping of media to the protocol objects, prioritization rules and additional business logic.
  - Track - a sequence of Objects within MBP
- - Track ID - a string used to identify a Track
+ - Track ID - a combination of globally uniqe provider identifier and a "Track Name" which is a string used to identify a Track.
 
 # Catalog
 
@@ -62,7 +62,15 @@ A Catalog is a special case of a Track. A Track is composed of a succession of O
 
 ## Catalog Track ID
 
-A Catalog MUST have a Track ID of "catalog". This ID is a lowercase string. Each Emission must have at most one Track ID of "catalog", which defines all other tracks within that emission.  If a streaming format requires a series of multiple catalogs, then it MUST maintain a singleton parent "catalog" which is the entry point and definition of all other child catalogs within that emission.
+A Catalog MUST have a Track ID whose Track Name MUST be the lowercase string "catalog". Each Emission MUST have at most one track with Track Name of "catalog", which defines all other tracks within that emission.  If a streaming format requires a series of multiple catalogs, then it MUST maintain a singleton parent "catalog" which is the entry point and definition of all other child catalogs within that emission.
+
+~~~
+Catalog TrackID := <provider-domain>/<emission-id>/catalog
+
+Ex: streaming.com/emission123/catalog identifies the catalog
+track for the emission123
+~~~
+
 
 ## Catalog payload structure
 
@@ -108,7 +116,8 @@ This document creates a new registry, "MoQ Base Protocol Catalog Type".  The reg
 
 ## Normative References
 
-  [RFC XXX]   Nandakumar, S "MoQ Base Protocol"
+  [MoQTransport]   Nandakumar, S "MOQTransport - Unified Media
+                   Delivery over QUIC"
               Work in progress
 
   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
