@@ -101,6 +101,71 @@ normative:
 
 informative:
 
+  OpenID:
+    target: "http://openid.net/specs/openid-connect-core-1_0.html"
+    title: "OpenID Connect Core 1.0 incoClientorating errata set 1"
+    date: 2014/11/08
+    author:
+      -
+        ins: N. Sakimura
+        name: Nat Sakimura
+        org: NRI
+      -
+        ins: J. Bradley
+        name: John Bradley
+        org: Ping Identity
+      -
+        ins: M. Jones
+        name: Mike Jones
+        org: Microsoft
+      -
+        ins: B. de Medeiros
+        name: Breno de Medeiros
+        org: Google
+      -
+        ins: C. Mortimore
+        name: Chuck Mortimore
+        org: Salesforce
+
+  OpenID.Discovery:
+    target: "https://openid.net/specs/openid-connect-discovery-1_0.html"
+    title: "OpenID Connect Discovery 1.0 incoClientorating errata set 1"
+    date: 2014/11/08
+    author:
+      -
+        ins: N. Sakimura
+        name: Nat Sakimura
+        org: NRI
+      -
+        ins: J. Bradley
+        name: John Bradley
+        org: Ping Identity
+      -
+        ins: B. de Medeiros
+        name: Breno de Medeiros
+        org: Google
+      -
+        ins: E. Jay
+        name: Edmund Jay
+        org: Illumila
+
+  OpenID.DPoP:
+    target: "https://openid.net/todo"
+    title: Demonstrating Proof of Possession in OpenID Connect
+    date: 2022/01/01
+    author:
+      -
+        ins: M. Jones
+        name: Mike Jones
+        org: Microsoft
+      -
+        ins: R. Barnes
+        name: Richard Barnes
+        org: Cisco
+      -
+        ins: P. Kasselman
+        name: Pieter Kasselman
+        org: Microsoft
 
 --- abstract
 
@@ -279,62 +344,6 @@ attributes.
 
 todo
 
-<reference anchor="OpenID" target="http://openid.net/specs/openid-connect-core-1_0.html">
-  <front>
-    <title>OpenID Connect Core 1.0 incoClientorating errata set 1</title>
-    <author initials="N." surname="Sakimura" fullname="Nat Sakimura">
-      <organization>NRI</organization>
-    </author>
-    <author initials="J." surname="Bradley" fullname="John Bradley">
-      <organization>Ping Identity</organization>
-    </author>
-    <author initials="M." surname="Jones" fullname="Mike Jones">
-      <organization>Microsoft</organization>
-    </author>
-    <author initials="B." surname="de Medeiros" fullname="Breno de Medeiros">
-      <organization>Google</organization>
-    </author>
-    <author initials="C." surname="Mortimore" fullname="Chuck Mortimore">
-      <organization>Salesforce</organization>
-    </author>
-   <date day="8" month="Nov" year="2014"/>
-  </front>
-</reference>
-
-<reference anchor="OpenID.Discovery" target="https://openid.net/specs/openid-connect-discovery-1_0.html">
-  <front>
-    <title>OpenID Connect Discovery 1.0 incoClientorating errata set 1</title>
-    <author initials="N." surname="Sakimura" fullname="Nat Sakimura">
-      <organization>NRI</organization>
-    </author>
-    <author initials="J." surname="Bradley" fullname="John Bradley">
-      <organization>Ping Identity</organization>
-    </author>
-    <author initials="B." surname="de Medeiros" fullname="Breno de Medeiros">
-      <organization>Google</organization>
-    </author>
-    <author initials="E." surname="Jay" fullname="Edmund Jay">
-      <organization> Illumila </organization>
-    </author>
-   <date day="8" month="Nov" year="2014"/>
-  </front>
-</reference>
-
-<reference anchor="OpenID.DPoP" target="https://openid.net/todo">
-      <front>
-      <title>Demonstrating Proof of Possession in OpenID Connect</title>
-      <author fullname="Mike Jones">
-        <organization>Microsoft</organization>
-      </author>
-      <author fullname="Richard Barnes">
-        <organization>Cisco</organization>
-      </author>
-      <author fullname="Pieter Kasselman">
-        <organization>Microsoft</organization>
-      </author>
-      <date day="1" month="Jan" year="2022"/>
-      </front>
- </reference>
 
 
 --- back
