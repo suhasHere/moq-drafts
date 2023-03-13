@@ -33,6 +33,71 @@ author:
     email: pthatcher@microsoft.com
 
 normative:
+  AV1:
+    title: "AV1 Bitstream & Decoding Process Specification"
+    date: January 18, 2019
+    seriesinfo:
+      Alliance for Open Media
+    url: https://aomedia.org/av1/specification/
+    authors:
+      -
+        ins: P. de Rivaz
+        name: Peter de Rivaz
+        org: Argon Design
+      -
+        ins: J. Haughton
+        name: Jack Haughton
+        org: Argon Design
+
+  H.264:
+    title: "Advanced video coding for generic audiovisual services"
+    date: 2013
+    seriesinfo:
+      ITU-T Recommendation H.264
+    author:
+      -
+        org: ITU-T
+
+  HEVC:
+    title: "High efficiency video coding"
+    date: 08/2021
+    seriesinfo:
+      ITU-T Recommendation H.265
+    author:
+      -
+        org: ITU-T
+
+  iso14496-15:
+    title: "Information technology — Coding of audio-visual objects — Part 15: Carriage of network abstraction layer"
+    date: 08/2022
+    seriesinfo:
+      ISO/IEC 14496-15 
+    author:
+      -
+        org: ISO/IEC
+
+  VP9-BITSTREAM:
+    title: "VP9 Bitstream & Decoding Process Specification"
+    date: 2016
+    seriesinfo:
+      Google APIs 
+    url: 
+      https://storage.googleapis.com/downloads.webmproject.org/
+              docs/vp9/vp9-bitstream-specification-
+              v0.6-20160331-draft.pdf
+    author:
+      -
+        ins: A. Grange
+        name: Adrian Grange
+        org: Google
+      -
+        ins: P. de Rivaz
+        name: Peter de Rivaz
+        org: Argon Design
+      -
+        ins: J. Hunt
+        name: Jonathan Hunt
+        org: Argon Design
 
 informative:
 
@@ -64,7 +129,7 @@ generic low overhead container format.l.
 
 ## Requirements Notation and Conventions
 
-The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD","SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119 [RFC2119].
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD","SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in {{!RFC2119}}.
 
 ## Terminology
 
@@ -76,33 +141,35 @@ TODO
 This section specifies format of the encoded payload for several
 audio and video codecs.
 
+TODO: verify and fix references.
+
 ## AV1
 
-The encoded video data MUST conform to EncodedVideoChunk Data format as defined in section 2 of [!@WC-AV1], which is expected to be data compliant to the "low-overhead bitstream format" as described in Section 5 of [AV1].
+The encoded video data MUST conform to EncodedVideoChunk Data format as defined in section 2 of {{AV1}}, which is expected to be data compliant to the "low-overhead bitstream format" as described in Section 5 of {{AV1}}.
 
 
 ## AVC/H.264
 
-The encoded video data MUST conform to EncodedVideoChunk Data format as defined in section 2 of [!@WC-AVC] with the bistream is expected to be
+The encoded video data MUST conform to EncodedVideoChunk Data format as defined in section 2 of {{H.264}} with the bistream is expected to be
 in canonical format, as defined in [iso14496-15] section 5.3.2.
 
 ## HEVC/H.265
 
-The encoded video data MUST conform to EncodedVideoChunk Data format as defined in section 2 of [!@WC-HEVC] with the bistream is expected to be
-in canonical format, as defined in [iso14496-15] section 8.3.2.
+The encoded video data MUST conform to EncodedVideoChunk Data format as defined in section 2 of {{HEVC}} with the bistream is expected to be
+in canonical format, as defined in {{iso14496-15}} section 8.3.2.
 
 ## VP8
 
-The encoded video data MUST conform to EncodedVideoChunk Data format as defined in section 2 of [!@WC-VP8], which is expected to be frame as described in Section 4 and Annex A of [VP8].
+The encoded video data MUST conform to EncodedVideoChunk Data format as defined in section 2 of {{!RFC6386}}, which is expected to be frame as described in Section 4 and Annex A of {{!RFC6386}}.
 
-## VP9
+## VP9 {#vp9-payload}
 
-The encoded video data MUST conform to EncodedVideoChunk Data format as defined in section 2 of [!@WC-VP8], which is expected to be frame as described in Section 6 of [VP9].
+The encoded video data MUST conform to EncodedVideoChunk Data format as defined in section 2 of {{!RFC6386}}, which is expected to be frame as described in Section 6 of {{VP9}}.
 
 
 ## OPUS
 
-The encoded audio data MUST conform to format as defined in Section 2 of [!@WC-OPUS] when the bitstream is in opus format. Bitstream of ogg format MUST NOT be used.
+The encoded audio data MUST conform to format as defined in Section 2 of {{!RFC6716}} when the bitstream is in opus format. Bitstream of ogg format MUST NOT be used.
 
 # Payload Header Data
 
@@ -126,7 +193,7 @@ Following metadata MUST be captures for each media frame
 
 ## Audio Metadata
 
-*Audio Level* captures the magnitude of the audio level of the corresponding audio frame and valus in encoded in 7 bits as defined in the Section 3 of RFC6464
+*Audio Level* captures the magnitude of the audio level of the corresponding audio frame and valus in encoded in 7 bits as defined in the {{Section 3 of RFC6464}}
 
 # Metadata Registration
 
@@ -164,7 +231,7 @@ With e2ee, What metadata is exposed to routers/server and which is encrypted and
 For SVC, is it 1 frame or N?  Update: for WebCodecs, it will be N frames (AKA EncodedVideoChunks)
 
 
-
+~~~~
 hbhauth		e2eau		e2ee
 [object_header][payload metadata][payload]
 Object header
@@ -195,7 +262,7 @@ Container Format
 Moq Transport Mapping
  	Seuence = ObjectId
 	Idr = group boundary
-
+~~~~
 
 
 
@@ -210,7 +277,7 @@ attributes.
 
 todo
 
-{backmatter}
+--- back
 
 <reference anchor="OpenID" target="http://openid.net/specs/openid-connect-core-1_0.html">
   <front>
