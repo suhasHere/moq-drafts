@@ -618,9 +618,9 @@ Fragment message:
 ~~~
 fragment {
   message_type(i),
-  [media_id(i)],
-  [group_id(i)],
-  [object_id(i)],
+  \[media_id(i)\],
+  \[group_id(i)\],
+  \[object_id(i)\],
   fragment_offset(i),
   object_length(i),
   fragment_length(i),
