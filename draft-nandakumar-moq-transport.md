@@ -664,6 +664,7 @@ dropping objects in case of congestion. The value must be the same
 for all fragments belonging to the same object.
 
 The flags field is encoded as:
+
 ~~~
 {
     maybe_dropped(1),
