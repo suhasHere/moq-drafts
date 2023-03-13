@@ -8,6 +8,7 @@ date: {DATE}
 category: info
 submissiontype: IETF
 consensus: true
+v: 3
 
 area: "RAI"
 workgroup: "Media Over QUIC"
