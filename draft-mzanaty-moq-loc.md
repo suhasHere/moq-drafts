@@ -95,6 +95,19 @@ Flags for frames which are independent, discardable, or base layer sync
 points, as well as temporal and spatial layer
 identification. {{!I-D.ietf-avtext-framemarking}} .
 
+1. Does all the tracks go into same decoder or different decoder ?
+   layered -> must go to the same decoder
+
+2. Multiple tracks
+    how are those mapped on encode side 
+    how are these fed into the decoder
+
+3. priority --> idr/not
+
+4.how is group and object number set or intepreted by the middleboxes ( switches not relays)
+
+5. Do we need extension mechanisms , like TLV ..
+
 ## Audio Header Data
 
 Audio Level: captures the magnitude of the audio level of the corresponding audio frame and values in encoded in 7 bits as defined in the section 3 of {{!RFC6464}}
@@ -138,6 +151,35 @@ with the header data as additional data input.
 +--------+------------+-------+------------+
 ~~~
 
+
+# Catalog 
+
+CATALOG payload {
+  media format type (i), // 0x02
+  version (i),
+  parent object sequence (i), --> // replace this with group/object semantics
+  track change count (i),
+  track change descriptors (..)
+}
+
+Track Change Descriptor {
+  full track name length (i),
+  full track name (..),
+  operation (1),
+  relation(...), <layered, simulcast, lip-sync>
+  codecConfig: webcodec's codec config
+}
+
+Extensions:
+    track media container format
+        default: container-less/loc
+        options: cmaf
+
+qualityprofile -> maximum decoder limits for a given codec and the quality being advertised.
+
+TrackABC
+Track123
+    repalces: trackABC
 
 # MOQ Transport Mapping
 
