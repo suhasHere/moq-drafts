@@ -152,7 +152,49 @@ with the header data as additional data input.
 ~~~
 
 
-# Catalog 
+
+# Catalog
+
+Catalog is a MOQT Object scoped to a MoQ Session {{session}} that
+provides information about tracks from a given publisher and
+is used by the subscribers for consuming tracks and for publishers
+to advertise the tracks. The content of "Catalog" is opaque to the
+Relays and may be end to end encrypted in certain scenarios.
+
+
+## Catalog Retrieval
+
+On a successful connection setup, subscribers proceed by retrieving the
+catalog (if not already retrieved), subscribing to the tracks of
+their interest and consuming the data published as detailed below.
+
+Catalog provides the details of tracks such as Track IDs and corresponding
+configuration details (audio/video codec detail, gamestate encoding details,
+for example).
+
+Catalogs are identifed as a special track, with its track name as "catalog".
+Catalog objects are retrieved by subscribing to its TrackID over
+its own control channel and the TrackID is formed as shown below
+
+~~~
+Catalog TrackID := <provider-domain>/<moq-session-id>/catalog
+
+Ex: streaming.com/emission123/catalog
+~~~
+
+A successfull subscription will lead to one or more catalog
+objects being published on a single unidirectional data stream.
+Successfull subscriptions implies authorizaiton for subscribing
+to the tracks in the catalog.
+
+Unsuccessful subscriptions MUST result in closure of the
+WebTransport session, followed by reporting the error obtained
+to the application.
+
+Catalog Objects obtained MUST parse successfully, otherwise
+MUST be treated as error, thus resulting the closure of the
+WebTransport session.
+
 
 CATALOG payload {
   media format type (i), // 0x02
