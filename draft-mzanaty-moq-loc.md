@@ -20,7 +20,7 @@ author:
     organization: Microsoft
     email: pthatcher@microsoft.com
 normative:
-  MOQT: 
+  MOQT:
     title: "Media over QUIC Transport"
     date: May 2023
     target: https://datatracker.ietf.org/doc/draft-lcurley-moq-transport/
@@ -60,7 +60,7 @@ normative:
     title: "Frame Marking RTP Header Extension"
     date: November 2021
     target: https://www.w3.org/TR/webcodecs-codec-registry/
-  
+
 informative:
 
 
@@ -69,7 +69,7 @@ informative:
 This specification describes a media container format for
 encoded and encrypted audio and video media data to be used
 primilarily for interactive media usecases, with the goal of it being
-a low overhead format. It also defines the MOQ Catalog format for publishers 
+a low overhead format. It also defines the MOQ Catalog format for publishers
 to annouce their tracks and for subscribers to consume the same.
 
 --- middle
@@ -77,26 +77,26 @@ to annouce their tracks and for subscribers to consume the same.
 # Introduction
 
 This specification describes a low-overhead media container format for
-encoded and encrypted audio and video media data. "Low-overhead" refers to minimal extra 
+encoded and encrypted audio and video media data. "Low-overhead" refers to minimal extra
 encapsulation as well as minimal application overhead when interfacing with WebCodecs.
 
-The container format description is specified for all audio and video codecs defined in the 
-WebCodecs Codec Registry. The audio and video payload bitstream is identical to the internal data 
+The container format description is specified for all audio and video codecs defined in the
+WebCodecs Codec Registry. The audio and video payload bitstream is identical to the internal data
 inside an EncodedAudioChunk and EncodedVideoChunk, respectively, specified in the registry.
 
 In addition to the media payloads, critical metadata is also specified for audio and video payloads.
 
-A primary motivation is to align with media formats used in WebCodecs to minimize application 
-overhead when interfacing with WebCodecs. Other container formats like CMAF or RTP would require 
-more extensive application overhead in format conversions, as well as larger encapsultion overhead 
+A primary motivation is to align with media formats used in WebCodecs to minimize application
+overhead when interfacing with WebCodecs. Other container formats like CMAF or RTP would require
+more extensive application overhead in format conversions, as well as larger encapsultion overhead
 which may burden some use cases like low bitrate audio scenarios.
 
 TODO: Add details on the sections
 
 ## Requirements Notation and Conventions
 
-The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD","SHOULD NOT", 
-"RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be 
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD","SHOULD NOT",
+"RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be
 interpreted as described in {{!RFC2119}}.
 
 ## Terminology
@@ -105,21 +105,21 @@ TODO
 
 # Payload Format {#payload}
 
-The WebCodecs Codec Registry defines the contents of an EncodedAudioChunk and 
-EncodedVideoChunk for the audio and video codec formats in the registry. The 
-"internal data" in these chunks is used directly in this specification as 
+The WebCodecs Codec Registry defines the contents of an EncodedAudioChunk and
+EncodedVideoChunk for the audio and video codec formats in the registry. The
+"internal data" in these chunks is used directly in this specification as
 the payload bitstream.
 
-An application object when transported as {!MOQT} object is composed of a header 
-and its payload. Media objects encoded using the container format defined in this 
-specification is shows as below, where in, the `MOQT Object's payload` is composed of 
+An application object when transported as {!MOQT} object is composed of a header
+and its payload. Media objects encoded using the container format defined in this
+specification is shows as below, where in, the `MOQT Object's payload` is composed of
 Loc Payload Header {{headers}} and encoded audio/video media that matches the
 WebCodec EncodedAudioChunk and EncodedVideoChunk encodings respectively.
 
 ~~~ ascii-art
 
 +----------------------+----------------+----------------------+
-|   MOQ Object Header  |   LOC Payload  |  EncodedAudioChunk/  | 
+|   MOQ Object Header  |   LOC Payload  |  EncodedAudioChunk/  |
 |                      |   Header       |  EncodedVideoChunk   |
 +----------------------+----------------+----------------------+
                         <-------------------------------------->
@@ -131,18 +131,18 @@ WebCodec EncodedAudioChunk and EncodedVideoChunk encodings respectively.
 
 # Payload Header Data {#headers}
 
-This section specified metadata that needs to be carried out as payload metadata. Payload 
-header data provides necessary information for intermediaries to perform switching decisions 
+This section specified metadata that needs to be carried out as payload metadata. Payload
+header data provides necessary information for intermediaries to perform switching decisions
 when the payload is inaccessible, due to encryption.
 
-Section ((#reg)) provides framework for registering  new payload header fields that aren't 
+Section ((#reg)) provides framework for registering  new payload header fields that aren't
 defined by this specification
 
 ## Common Header Data
 
 Following metadata MUST be captured for each media frame
 
-Sequence Number: Identifies a sequentially increasing variable length integer that is 
+Sequence Number: Identifies a sequentially increasing variable length integer that is
 incremented per encoded media frame.
 
 Capture Timestamp in Microseconds: Captures the wall-clock time of the encoded media frame.
@@ -157,7 +157,7 @@ identification. {{!I-D.ietf-avtext-framemarking}} .
    layered -> must go to the same decoder
 
 2. Multiple tracks
-    how are those mapped on encode side 
+    how are those mapped on encode side
     how are these fed into the decoder
 
 3. priority --> idr/not
@@ -168,12 +168,12 @@ identification. {{!I-D.ietf-avtext-framemarking}} .
 
 ## Audio Header Data
 
-Audio Level: captures the magnitude of the audio level of the corresponding audio frame and 
+Audio Level: captures the magnitude of the audio level of the corresponding audio frame and
 values in encoded in 7 bits as defined in the section 3 of {{!RFC6464}}
 
 ## Header Data Registration {#reg}
 
-This section details the procedures to register header data fields that might be useful for a 
+This section details the procedures to register header data fields that might be useful for a
 particular class of media applications.
 
 Registering a given metadata field requires the following attributes to be specified.
@@ -194,19 +194,19 @@ new for header data values.
 
 # Catalog
 
-A Catalog is a MOQT Object that provides information about tracks from a given 
-publisher. Catalog is used by subscribers for consuming tracks and for publishers 
-to advertise the tracks. The content of "Catalog" is opaque to the Relays and may 
-be end to end encrypted. Catalog provides the details of tracks such as Track IDs 
-and corresponding media configuration details (audio/video codec detail, 
+A Catalog is a MOQT Object that provides information about tracks from a given
+publisher. Catalog is used by subscribers for consuming tracks and for publishers
+to advertise the tracks. The content of "Catalog" is opaque to the Relays and may
+be end to end encrypted. Catalog provides the details of tracks such as Track IDs
+and corresponding media configuration details (audio/video codec detail,
 gamestate encoding details,for example).
 
 ## Catalog Fields
 
-At the minumum catalog MUST provide enough information about MOQ Tracks, such as 
-its identifier, information about media for the track, for the consumers to 
-make appropriate subscription decisions. Following subsections identify 
-the mandatory `base` fields and optional `extensions` fields that describe 
+At the minumum catalog MUST provide enough information about MOQ Tracks, such as
+its identifier, information about media for the track, for the consumers to
+make appropriate subscription decisions. Following subsections identify
+the mandatory `base` fields and optional `extensions` fields that describe
 a given publisher's track in the catalog.
 
 ### Base Fields
@@ -221,7 +221,7 @@ This section identifies the mandatory fields needs to be defined per track liste
 Table 1 provides an overview of all base fields defined by this
 document.
 
-| Name            | Label | Media Type | JSON Type | 
+| Name            | Label | Media Type | JSON Type |
 |:================|:======|:===========|:==========|
 | Track Namespace | ns    |  AV        |   String  |
 | Track Name      | tn    |  AV        |   String  |
@@ -238,11 +238,11 @@ document.
 
 
 
-Table 2 provides label and type identification for 
+Table 2 provides label and type identification for
 the extension fields
 
- 
-| Name            | Label | Media Type | JSON Type | 
+
+| Name            | Label | Media Type | JSON Type |
 |:================|:======|:===========|:==========|
 | Temporal ID     | tid    |  V        |   String  |
 | Spatial ID      | lid    |  V        |   String  |
@@ -253,8 +253,8 @@ TODO: Define a TLV strucuture.
 
 ### Track Quality Profile {#profile}
 
-Each track has an associated quality profile that describes the 
-media objects for that track. Following properties identify 
+Each track has an associated quality profile that describes the
+media objects for that track. Following properties identify
 a track's quality profile.
 
 * Codec: Codec information as defined by the codec registrations listed in {{WEBCODECS-CODEC-REGISTRY}}.
@@ -270,11 +270,11 @@ a track's quality profile.
 * ChanelCount: As defined in section 7.7 of {{WEBCODECS-CODEC-REGISTRY}}.
 
 * DisplayWidth, DisplayHeight: As defined in section 7.7 of {{WEBCODECS-CODEC-REGISTRY}}.
-         
+
 Table 3 provides an overview of all QualityProfile fields defined by this
 document with their respective labels, applicable media types and data types.
 
-| Name          | Label | Media Type | JSON Type | 
+| Name          | Label | Media Type | JSON Type |
 |:==============|:======|:===========|:==========|
 | Codec         | cs    |  AV        |   String  |
 | Framerate     | fr    |  V         |   Number  |
@@ -286,32 +286,43 @@ document with their respective labels, applicable media types and data types.
 | DisplayWidth  | dw    |  V         |   Number  |
 | DisplayHeight | dh    |  V         |   Number  |
 
-For details of the JSON representation, see Section {{json}}; for 
+For details of the JSON representation, see Section {{json}}; for
 Raw binary, see Section {{binary}}.
 
 TODO: Define CBOR encoding.
 
 ### Track Relations {#relations}
 
-Tracks can express dependency on other tracks via relations 
+Tracks can express dependency on other tracks via relations
 property. Following relation types are defined in this document.
 
-* time-aligned: Indicates set of tracks that share the same time 
-  offset when producing the media as well as considered as 
+* time-aligned: Indicates set of tracks that share the same time
+  offset when producing the media as well as considered as
   having same time offset when consuming the media. Typical
   example would be simulcasting a camera capture across multiple
   encoding qualities.
 
-* lip-sync: Indicates a synchronized playout of the media 
+* lip-sync: Indicates a synchronized playout of the media
   from the tracks identified. Example audio and video media
   sync for playout in a conference setting.
 
 * layered: Indicates tracks are dependent via layered encoding
   and applies to video tracks. Each track that is part of the
-  layered relation set MUST include depend quality profile 
+  layered relation set MUST include depend quality profile
   property except the base layer.
-  
 
+
+CMAF defines the following logical media objects:
+
+CMAF track, which contains encoded samples of media, such as video, audio, and subtitles, with a CMAF header and fragments. The samples are stored in a CMAF-specified container based on the ISO Base Media File Format (ISO BMFF). You can also protect media samples by means of MPEG Common Encryption (COMMON ENC).
+
+CMAF switching set, which contains alternative tracks with different resolutions and bitrates for adaptive streaming, which you can splice in at the boundaries of CMAF fragments.
+
+Aligned CMAF switching set, which contains switching sets from the same source through alternative encodings (e.g., with different codecs), which are time-aligned to one another.
+
+CMAF selection set, which contains switching sets in the same media format. That format might contain different content, such as alternative camera angles or languages; or different encodings, such as alternative codecs.
+
+CMAF presentation, which contains one or more presentation time-synchronized selection sets.
 
 
 ## Catalog Retrieval
@@ -343,11 +354,11 @@ WebTransport session.
 
 ## JSON Representation {#json}
 
-TODO 
+TODO
 
 ```
 {
-   
+
  "publications": [
   {
     mediaType: "video",
@@ -363,7 +374,7 @@ TODO
 
 ## Raw Binary Representation {#binary}
 
-TODO 
+TODO
 
 ```
 CATALOG payload {
