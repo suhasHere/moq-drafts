@@ -34,9 +34,9 @@ informative:
 
 This specification describes a media container format for
 encoded and encrypted audio and video media data to be used
-primilarily for interactive media usecases, with the goal of it being
+primarily for interactive media usecases, with the goal of it being
 a low overhead format. It also defines the MOQ Catalog format for publishers
-to annouce their tracks and for subscribers to consume the same.
+to announce their tracks and for subscribers to consume the same.
 
 --- middle
 
@@ -64,10 +64,6 @@ TODO: Add details on the sections
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD","SHOULD NOT",
 "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be
 interpreted as described in {{!RFC2119}}.
-
-## Terminology
-
-TODO
 
 # Payload Format {#payload}
 
@@ -165,7 +161,9 @@ to advertise the tracks. The content of "Catalog" is opaque to the Relays and ma
 
 ## Catalog Fields
 
-At the minumum catalog MUST provide enough information about MOQ Tracks, such as its full name, information about media for the track and mode of usage of the underlying QUIC transport. Following subsections identify the mandatory {{base}} fields and optional {{extensions}} fields that describe a given publisher's track in the catalog. However, the application is free to add further fields than the ones defined in this specification.
+At the minumum catalog MUST provide enough information about MOQ Tracks, such as its full name, information about media for the track and mode of usage of the underlying QUIC transport. Following subsections identify the mandatory {{base}} fields and optional {{extensions}} fields that describe a given publisher's track in the catalog. The applications is free to add further fields to the catalog that is deemed necessary than the ones defined in this specification and they don't need to be standardized.
+
+TODO: Describe mechanics for preventing field name conflicts for future extensions and for application specific extensions.
 
 ### Base Fields {#base}
 
@@ -263,7 +261,7 @@ property. Following relation types are defined in this document.
 
 * layered: Indicates tracks are dependent via layered encoding
   and applies to video tracks. Each track that is part of the
-  layered relation set MUST include `depend`field listing the 
+  layered relation set MUST include `depend`field listing the
   dependencies.
 
 
@@ -304,12 +302,12 @@ WebTransport session.
 
 # Examples
 
-Following section provides JSON examples of the catalog 
+Following section provides JSON examples of the catalog
 
 ## Lip Sync Audio/Video Tracks with single quality
 
-This example shows catalog for the media sender, Alice, capable 
-of sending audio and video tracks and share lip-sync relation. 
+This example shows catalog for the media sender, Alice, capable
+of sending audio and video tracks and share lip-sync relation.
 
 ~~~json
 {
@@ -332,10 +330,10 @@ of sending audio and video tracks and share lip-sync relation.
 ~~~
 
 
-### Simulcast video tracks - 3 qualties
+### Simulcast video tracks - 3 qualities
 
-This example shows catalog for the media sender, Alice, capable 
-of sending 3 video tracks for high definition, low definition and 
+This example shows catalog for the media sender, Alice, capable
+of sending 3 video tracks for high definition, low definition and
 medium definition qualities in time-aligned relation.
 
 
@@ -386,17 +384,13 @@ with the header data as additional data input.
 
 
 
-# MOQ Transport Mapping
-
-TODO
-
 # Security Considerations
 
 TODO
 
 # IANA Considerations {#iana}
 
-TODO on specification required for metadata registration.
+TODO on registering field names and mechanisms for future extensions and application defined fields
 
 --- back
 
