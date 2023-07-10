@@ -86,10 +86,6 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD","SH
 "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be
 interpreted as described in {{!RFC2119}}.
 
-## Terminology
-
-TODO
-
 # Payload Format {#payload}
 
 The WebCodecs Codec Registry defines the contents of an EncodedAudioChunk and
@@ -183,7 +179,9 @@ to advertise the tracks. The content of "Catalog" is opaque to the Relays and ma
 
 ## Catalog Fields
 
-At the minumum catalog MUST provide enough information about MOQ Tracks, such as its full name, information about media for the track and mode of usage of the underlying QUIC transport. Following subsections identify the mandatory {{base}} fields and optional {{extensions}} fields that describe a given publisher's track in the catalog. However, the application is free to add further fields than the ones defined in this specification.
+At the minumum catalog MUST provide enough information about MOQ Tracks, such as its full name, information about media for the track and mode of usage of the underlying QUIC transport. Following subsections identify the mandatory {{base}} fields and optional {{extensions}} fields that describe a given publisher's track in the catalog. The applications is free to add further fields to the catalog that is deemed necessary than the ones defined in this specification and they don't need to be standardized.
+
+TODO: Describe mechanics for preventing field name conflicts for future extensions and for application specific extensions.
 
 ### Base Fields {#base}
 
@@ -281,7 +279,7 @@ property. Following relation types are defined in this document.
 
 * layered: Indicates tracks are dependent via layered encoding
   and applies to video tracks. Each track that is part of the
-  layered relation set MUST include `depend`field listing the 
+  layered relation set MUST include `depend`field listing the
   dependencies.
 
 
@@ -352,8 +350,9 @@ of sending audio and video tracks and share lip-sync relation.
 
 ### Simulcast video tracks - 3 qualities
 
-This example shows catalog for the media sender, Alice, capable 
-of sending 3 video tracks for high definition, low definition and 
+
+This example shows catalog for the media sender, Alice, capable
+of sending 3 video tracks for high definition, low definition and
 medium definition qualities in time-aligned relation.
 
 
