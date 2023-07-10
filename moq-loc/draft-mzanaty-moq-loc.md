@@ -5,7 +5,7 @@ docname: draft-mzanaty-moq-loc-latest
 category: info
 submissiontype: IETF
 ipr: trust200902
-submissionType: info
+stand_alone: yes
 author:
 -
     fullname: Mo Zanaty
@@ -20,42 +20,8 @@ author:
     organization: Microsoft
     email: pthatcher@microsoft.com
 normative:
-  MOQT:
-    title: "Media over QUIC Transport"
-    date: May 2023
-    target: https://datatracker.ietf.org/doc/draft-lcurley-moq-transport/
-    authors:
-      - ins: L. Curley
-        name: Luke Curley
-        org: Twitch
-      - ins: K. Pugin
-        name: Kiril Pugin
-        org: Meta
-      -
-        ins: S. Nandakumar
-        name: Suhas Nandakumar
-        org: Cisco Systems
-      -
-        ins: V. Vasiliev
-        name: Victor Vasiliev
-        org: Google
-  Framemarking:
-    title: "Frame Marking RTP Header Extension"
-    date: November 2021
-    target: https://datatracker.ietf.org/doc/draft-ietf-avtext-framemarking/
-    authors:
-      -
-        ins: M. Zanaty
-        name: Mo Zanaty
-        org: Cisco Systems
-      -
-        ins: E. Berger
-        name: Espen Berger
-        org: Cisco Systems
-      -
-        ins: S. Nandakumar
-        name: Suhas Nandakumar
-        org: Cisco Systems
+  MoQTransport: I-D.ietf-moq-transport
+  Framemarking: I-D.ietf-avtext-framemarking
   WEBCODECS-CODEC-REGISTRY:
     title: "Frame Marking RTP Header Extension"
     date: November 2021
@@ -194,27 +160,19 @@ new for header data values.
 
 # Catalog
 
-A Catalog is a MOQT Object that provides information about tracks from a given
-publisher. Catalog is used by subscribers for consuming tracks and for publishers
-to advertise the tracks. The content of "Catalog" is opaque to the Relays and may
-be end to end encrypted. Catalog provides the details of tracks such as Track IDs
-and corresponding media configuration details (audio/video codec detail,
-gamestate encoding details,for example).
+A Catalog is a MOQT Object that provides information about tracks from a given publisher. Catalog is used by subscribers for consuming tracks and for publishers
+to advertise the tracks. The content of "Catalog" is opaque to the Relays and may be end to end encrypted. Catalog provides the details of tracks such as Track IDs and corresponding media configuration details (audio/video codec detail, gamestate encoding details, for example)
 
 ## Catalog Fields
 
-At the minumum catalog MUST provide enough information about MOQ Tracks, such as
-its identifier, information about media for the track, for the consumers to
-make appropriate subscription decisions. Following subsections identify
-the mandatory `base` fields and optional `extensions` fields that describe
-a given publisher's track in the catalog.
+At the minumum catalog MUST provide enough information about MOQ Tracks, such as its full name, information about media for the track and mode of usage of the underlying QUIC transport. Following subsections identify the mandatory {{base}} fields and optional {{extensions}} fields that describe a given publisher's track in the catalog. However, the application is free to add further fields than the ones defined in this specification.
 
-### Base Fields
+### Base Fields {#base}
 
 This section identifies the mandatory fields needs to be defined per track listed in the catalog.
 
-* Track Namespace: See section 2.3 of {{MOQT}}
-* Track Name: See section 2.3 of {{MOQT}}
+* Track Namespace: See section 2.3 of {{MoQTransport}}
+* Track Name: See section 2.3 of {{MoQTransport}}
 * Track Qualiity Profile: See {{profile}}
 * Relation: See {{relations}}
 
@@ -226,30 +184,31 @@ document.
 | Track Namespace | ns    |  AV        |   String  |
 | Track Name      | tn    |  AV        |   String  |
 | QualityProfile  | qp    | See {{profile}}        |
-| Relation        | rel   | See {{relations}}      |
 
-### Extension Fields
+### Extension Fields {#extensions}
 
-* Temporal ID: TODO
+Following optional extension fields may be supported by the applocation.
 
-* Spatial ID: TODO
+* Temporal ID: Identifies the temporal layer/sub-layer encoded, starting with 0 for the base layer, and increasing with higher temporal fidelity.
 
-* Depend: TODO
+* Spatial ID: Identifies the spatial and quality layer encoded, starting with 0 for the base layer, and increasing with higher fidelity.
 
+* Depend: Identifies track dependencies for a given track.
+
+* Relation: See {{relations}}.
 
 
 Table 2 provides label and type identification for
 the extension fields
-
 
 | Name            | Label | Media Type | JSON Type |
 |:================|:======|:===========|:==========|
 | Temporal ID     | tid    |  V        |   String  |
 | Spatial ID      | lid    |  V        |   String  |
 | Depend          | dep    |  V        |   Array   |
+| Relation        | rel   | See {{relations}}      |
 
 
-TODO: Define a TLV strucuture.
 
 ### Track Quality Profile {#profile}
 
@@ -286,10 +245,6 @@ document with their respective labels, applicable media types and data types.
 | DisplayWidth  | dw    |  V         |   Number  |
 | DisplayHeight | dh    |  V         |   Number  |
 
-For details of the JSON representation, see Section {{json}}; for
-Raw binary, see Section {{binary}}.
-
-TODO: Define CBOR encoding.
 
 ### Track Relations {#relations}
 
@@ -304,25 +259,24 @@ property. Following relation types are defined in this document.
 
 * lip-sync: Indicates a synchronized playout of the media
   from the tracks identified. Example audio and video media
-  sync for playout in a conference setting.
+  synced for playout in a conference setting.
 
 * layered: Indicates tracks are dependent via layered encoding
   and applies to video tracks. Each track that is part of the
-  layered relation set MUST include depend quality profile
-  property except the base layer.
+  layered relation set MUST include `depend`field listing the 
+  dependencies.
 
 
-CMAF defines the following logical media objects:
+Table 4 lists relation fields defined by this
+document with their respective labels, applicable media types and data types.
 
-CMAF track, which contains encoded samples of media, such as video, audio, and subtitles, with a CMAF header and fragments. The samples are stored in a CMAF-specified container based on the ISO Base Media File Format (ISO BMFF). You can also protect media samples by means of MPEG Common Encryption (COMMON ENC).
 
-CMAF switching set, which contains alternative tracks with different resolutions and bitrates for adaptive streaming, which you can splice in at the boundaries of CMAF fragments.
+| Name          | Label | Media Type | JSON Type |
+|:==============|:======|:===========|:==========|
+| lip-sync      | ls    |  AV        |   Array   |
+| layered       | ly    |  V         |   Number  |
+| time-aligned  | ta    |  AV        |   Number  |
 
-Aligned CMAF switching set, which contains switching sets from the same source through alternative encodings (e.g., with different codecs), which are time-aligned to one another.
-
-CMAF selection set, which contains switching sets in the same media format. That format might contain different content, such as alternative camera angles or languages; or different encodings, such as alternative codecs.
-
-CMAF presentation, which contains one or more presentation time-synchronized selection sets.
 
 
 ## Catalog Retrieval
@@ -331,18 +285,16 @@ On a successful connection setup, subscribers proceed by retrieving the
 catalog (if not already retrieved), subscribing to the tracks of
 their interest and consuming the data published as detailed below.
 
-
 Catalogs are identifed as a special track, with its `Track Name` as "catalog".
 Catalog objects are retrieved by subscribing to its `Full Track Name`  over
-its own MoQ control channel. I
+its own MoQ control channel (Bidirectional QUIC Stream). I
 
 A successfull subscription will lead to one or more catalog
-objects being published on a single unidirectional data stream.
-Successfull subscriptions implies authorization for subscribing
+objects being published and implies authorization for subscribing
 to the tracks in the catalog.
 
 Unsuccessful subscriptions MUST result in closure of the
-Moqsession, followed by reporting the error obtained
+MOQT session, followed by reporting the error obtained
 to the application.
 
 Catalog Objects obtained MUST parse successfully, otherwise
@@ -350,62 +302,67 @@ MUST be treated as error, thus resulting the closure of the
 WebTransport session.
 
 
-# Catalog Encoding
+# Examples
 
-## JSON Representation {#json}
+Following section provides JSON examples of the catalog 
 
-TODO
+## Lip Sync Audio/Video Tracks with single quality
 
-```
+This example shows catalog for the media sender, Alice, capable 
+of sending audio and video tracks and share lip-sync relation. 
+
+~~~json
 {
 
- "publications": [
-  {
-    mediaType: "video",
-    trackNamespace: "track-namespace",
-    trackName: "main-audio",
-    "qualityProfile": "codec=av01.0.08M.10.0.110.09,width=1920,height=1080,framerate=30,br=100"
-  },
+  "ls": ["audio", "video"],
+  [
+    {
+      "ns": "conference.example.com/conference123/alice",
+      "n": "video",
+      "qp": "cs=av01.0.08M.10.0.110.09,wd=1920,ht=1080,fr=30"
+    },
+    {
+      "ns": "conference.example.com/conference123/alice",
+      "n": "audio",
+      "qp": "cs=opus,sr=48000,cc=2"
+    }
  ],
 }
 
-```
+~~~
 
 
-## Raw Binary Representation {#binary}
+### Simulcast video tracks - 3 qualties
 
-TODO
+This example shows catalog for the media sender, Alice, capable 
+of sending 3 video tracks for high definition, low definition and 
+medium definition qualities in time-aligned relation.
 
-```
-CATALOG payload {
-  media format type (i), // 0x02
-  version (i),
-  parent object sequence (i), --> // replace this with group/object semantics
-  track change count (i),
-  track change descriptors (..)
+
+~~~json
+{
+
+  "ta": ["hd", "sd", "md"],
+  [
+    {
+      "ns": "conference.example.com/conference123/alice",
+      "n": "hd",
+      "qp": "cs=av01,wd=1920,ht=1080,fr=30"
+    },
+    {
+      "ns": "conference.example.com/conference123/alice",
+      "n": "md",
+      "qp": "cs=av01,wd=720,ht=640,fr=30"
+    },
+    {
+      "ns": "conference.example.com/conference123/alice",
+      "n": "sd",
+      "qp": "cs=av01,wd=192,ht=144,fr=30"
+    }
+ ],
 }
 
-Track Change Descriptor {
-  full track name length (i),
-  full track name (..),
-  operation (1),
-  relation(...), <layered, simulcast, lip-sync>
-  codecConfig: webcodec's codec config
-}
-
-Extensions:
-    track media container format
-        default: container-less/loc
-        options: cmaf
-
-qualityprofile -> maximum decoder limits for a given codec and the quality being advertised.
-
-TrackABC
-Track123
-    repalces: trackABC
-```
-
-
+~~~
 
 # Payload Encryption
 
