@@ -42,17 +42,17 @@ Media over QUIC Transport (MOQT) defines a publish/subscribe based unified media
 
 # Introduction
 
-Media Over QUIC Transport (MOQT) {{?MoQTransport}} allows set of publishers and subscribers to participate in the media delivery over QUIC for streaming and interactive applications. The MOQT specification defines the necessary protocol machinery for the endpoints and relays to particpate, however, it doesn't provide recommendations for media applications on using MOQT object model and mapping the same to underlying QUIC transport.
+Media Over QUIC Transport (MOQT) {{?MoQTransport}} allows set of publishers and subscribers to participate in the media delivery over QUIC for streaming and interactive applications. The MOQT specification defines the necessary protocol machinery for the endpoints and relays to participate, however, it doesn't provide recommendations for media applications on using MOQT object model and mapping the same to underlying QUIC transport.
 
 This document introduces MOQT's object model mapping to underlying QUIC transport in {{quic-map}}. The sections {{moq-audio}}
-and {{moq-video}} describe various grouping of application level media objects and their mapping to the MOQT object model. Section {{multi}} disucsses considerations when using multi quality video applications, such as simulcast and/or layer coding, over the MOQT protocol. Section {{abr}} describes considerations for adaptive bitrate techniques and finally the section {{priority}} discusses interactions when priorities are used on objects and tracks.
+and {{moq-video}} describe various grouping of application level media objects and their mapping to the MOQT object model. Section {{multi}} discusses considerations when using multi quality video applications, such as simulcast and/or layer coding, over the MOQT protocol. Section {{abr}} describes considerations for adaptive bitrate techniques and finally the section {{priority}} discusses interactions when priorities are used on objects and tracks.
 
 Below picture captures the conceptual model showing mapping at various levels of a typical media application stack using MOQT delivery protocol.
 
 
 ~~~ascii
 +------------------------------+
-|     Application Data         | ----+ frames,slices,segments
+|     Application Data         | ----+ frames, slices, segments
 +---------------+--------------+     |
                 |                    v
                 |   +-------------------------------+
@@ -105,16 +105,16 @@ Encoded (and/or) Encrypted Media Stream
 
 In this mode, an unidirectional QUIC stream is setup per MOQ Group (section 2.2 of {{?MoQTransport}}). Following observations can be made about such a setup
 
-* MOQT groups typically represent things that share some kind of relationship (eg decodability, priority) and having the objects of a group share the same underlying stream context allows them to delivered cohorently. 
+* MOQT groups typically represent things that share some kind of relationship (eg decodable, priority) and having the objects of a group share the same underlying stream context allows them to delivered coherently. 
 
 * Media consumers can map each incoming QUIC stream into decoding context in the order of their arrival.
 
-* Since the objects within group share the QUIC stream, there is likelyhood of increased end to end latency due to head-of-line blocking under losses.
+* Since the objects within group share the QUIC stream, there is likelihood of increased end to end latency due to head-of-line blocking under losses.
 
 
 ## Stream per MOQT Object {#spo}
 
-In this mode, an unidirectional QUIC stream is setup per MOQ Objecy (section 2.1 of {{?MoQTransport}}). Following observations can be made about such a setup 
+In this mode, an unidirectional QUIC stream is setup per MOQ Object (section 2.1 of {{?MoQTransport}}). Following observations can be made about such a setup 
 
 * Using a single stream per object can help reduce latency at the source, when objects represent smaller units of the application data (say a single encoded frame or a small number of the same). 
 
@@ -134,17 +134,17 @@ In this mode, there is one unidirectional QUIC stream per MOQT Track (section 2.
 * Since all the objects within the track share the same stream, the may be impact on end to end latency due to HOL blocking under loss.
 
 
-## Stream per Priortiy {#spop}
+## Stream per Priority {#spop}
 
 In this mode, there is one unidirectional QUIC stream per MOQT Track/Object priority. Following observations can be made about such a setup 
 
-* This scheme is relatively simpler in its implementation and number of stream contextx match number of priority levels.
+* This scheme is relatively simpler in its implementation and number of stream context match number of priority levels.
 
 * Such a scheme can be used at Relays when forwarding decisions can be naturally mapped to priorities carried in the object header.
 
 ## Stream per multiple MOQT Tracks {#spmt}
 
-This mode is simialar {{spt}} but with more than one MOQT track delivered over a single unidirectional QUIC stream, thus allowing implementations to map multiple incoming QUIC streams to a few outgoing QUIC Streams. Similar to {{spt}}, this mode is relatively simple in its implementation and at the same time may suffer from latency impacts under losses.
+This mode is similar {{spt}} but with more than one MOQT track delivered over a single unidirectional QUIC stream, thus allowing implementations to map multiple incoming QUIC streams to a few outgoing QUIC Streams. Similar to {{spt}}, this mode is relatively simple in its implementation and at the same time may suffer from latency impacts under losses.
 
 # MoQ Audio Objects {#moq-audio}
 
@@ -159,11 +159,11 @@ Future sub 2 kbps audio codecs may take advantage of a rapidly updated model tha
 
 # MoQ Video Objects {#moq-video}
 
-The decision on what constitues a MOQ object/group and its preferred mapping to the underlying QUIC transport for video streams is governed by the granularity of encoded bitstream, as chosen by the application. The smallest unit of such an application defined encoded bistream will be referred to as "Video Atom" in this specification and they are mapped 1:1 to MOQ Objects.
+The decision on what constitutes a MOQ object/group and its preferred mapping to the underlying QUIC transport for video streams is governed by the granularity of encoded bitstream, as chosen by the application. The smallest unit of such an application defined encoded bitstream will be referred to as "Video Atom" in this specification and they are mapped 1:1 to MOQ Objects.
 
 The size and duration of a video atom is application controlled and follow various strategies driven by application requirements such as latency, quality, bandwidth and so on. 
 
-Following subsections identify various granulraties definiing the video atoms and their corresponding mapping to MOQT object model and the underlying QUIC transport.
+Following subsections identify various granularities defining the video atoms and their corresponding mapping to MOQT object model and the underlying QUIC transport.
 
 
 ## Encoded Frame {#enc-frame}
@@ -182,7 +182,7 @@ In Slice-based encoding a single video frame is “sliced” into separate secti
 
 In this scheme, each encoded slice is a MOQT Object, starting with IDR frame as `Object Sequence` of 0 for that slice and followed by delta frames with `Object Sequence` incremented by 1 successively. A MOQT Group is identified by set of such objects at each IDR frame boundaries. To be able to successfully decode and render, the identifier of the containing video frame for the slice is needs to be carried end to end. This would allow the media consumer to map the slices to right decoding context of the frame being processed.
 
->Note: The video frame identitifer may be carried either as part of encoded object's payload header or introduce a group header for conveying the frame identifier. 
+>Note: The video frame identifier may be carried either as part of encoded object's payload header or introduce a group header for conveying the frame identifier. 
 
 When using QUIC mapping scheme defined in {{spo}}, each unidirectional QUIC stream is used to deliver one encoded slice of a video frame. When using QUIC mapping as defined in {spg}, each unidirectional QUIC stream is setup to deliver all the encoded slices (objects) within a group. 
  
@@ -191,13 +191,13 @@ When using QUIC mapping scheme defined in {{spo}}, each unidirectional QUIC stre
 
 CMAF {{CMAF}} chunks are CMAF addressable media objects that contain a consecutive subset of the media samples in a CMAF fragment. CMAF chunks can be used by a delivery protocol to deliver media samples as soon as possible during live encoding and streaming, i.e., typically less than a second. CMAF chunks enable the progressive encoding, delivery, and decoding of each CMAF fragment.
 
-A given video application may choose to have chunk duration to span more than on encoded video frame. When using CMAF chunks, each MOQT Object corresponds to a CMAF chunk. The CMAF chunk containing the IDR Frame shall have `Object Sequence` set to 0, with each additionl chunk with its `Obect Sequence` incremented by 1. The `Group Sequence` is incremented at every IDR interval and all the CMAF chunks within a given IDR interval shall be part of the same MOQT Group.
+A given video application may choose to have chunk duration to span more than on encoded video frame. When using CMAF chunks, each MOQT Object corresponds to a CMAF chunk. The CMAF chunk containing the IDR Frame shall have `Object Sequence` set to 0, with each additional chunk with its `Object Sequence` incremented by 1. The `Group Sequence` is incremented at every IDR interval and all the CMAF chunks within a given IDR interval shall be part of the same MOQT Group.
 
 When using QUIC mapping scheme defined in {{spo}}, each unidirectional QUIC stream is used to deliver a CMAF Chunk. When using QUIC mapping as defined in {spg}, each unidirectional QUIC stream is setup to deliver all the CMAF chunks (objects) within a group. When using QUIC mapping defined in {{spt}} CMAF chunk corresponding to CMAF track are delivered over the same unidirectional QUIC stream. 
 
 ## CMAF Fragment {#enc-cmaf-frag}
 
-CMAF fragments are the media objects that are encoded and decoded. For scenarios, where the fragments contian one or more complete coded and independently decodable video sequences, each such fragment is identified as single MOQT Object and it forms its own MOQT Group. There is one unidirectional QUIC stream per such an object {{spo}}. Media senders should stream the bytes of the object, in the decode order, as they are generated in order the reduce the latencies.
+CMAF fragments are the media objects that are encoded and decoded. For scenarios, where the fragments contains one or more complete coded and independently decodable video sequences, each such fragment is identified as single MOQT Object and it forms its own MOQT Group. There is one unidirectional QUIC stream per such an object {{spo}}. Media senders should stream the bytes of the object, in the decode order, as they are generated in order the reduce the latencies.
 
 
 # MOQT Track 
@@ -211,9 +211,9 @@ single quality audio and video streams, applications shall map the
 audio and video streams to individual tracks enabling each 
 track to represent a single quality. 
 
-# Multiple Quality Media Streans {#multi}
+# Multiple Quality Media Streams {#multi}
 
-It is not uncommon for applications to support multiple qualities (renditions) per source stream to support receivers with varied capabilites, enabling adaptive bitrate media flows, for example. We describe 2 common approaches for supporting multiple qualities(renditions/encodings) - Simulcast and Layered Coding. Sections below discusses media application's mapping of multiple media qualities to the MOQT object model and the underlying QUIC transport.
+It is not uncommon for applications to support multiple qualities (renditions) per source stream to support receivers with varied capabilities, enabling adaptive bitrate media flows, for example. We describe 2 common approaches for supporting multiple qualities(renditions/encodings) - Simulcast and Layered Coding. Sections below discusses media application's mapping of multiple media qualities to the MOQT object model and the underlying QUIC transport.
 
 ## Simulcast {#simulcast}
 
@@ -223,7 +223,7 @@ consumers to switch between tracks at group boundaries seamlessly.
 
 Few observations:
 
-* Catalog should identify time-aliged relationship between the simulcasted tracks.
+* Catalog should identify time-aligned relationship between the simulcasted tracks.
 * All the alternate encodings shall matching base timestamp and duration.
 * All the alternate encodings are for the same source media stream.
 * Media consumers can pick and choose the right quality by subscribing to the appropriate track.
@@ -241,15 +241,15 @@ Such an organization allows bitstream to be extracted at lower bit rate than the
 
 In this mode, the video applications transmits all the SVC layers under a single MOQT Track. When mapping to the MOQT object model, any of the methods described in {{moq-video}} can be leveraged to mapped the encoded bitstream into MOQT groups and objects. 
 
-When transmitting all the layers as part of a single track, following properites needs to be considered:
+When transmitting all the layers as part of a single track, following properties needs to be considered:
 
-* Catalog should identify the SVC Codec information in its codec defintion.
+* Catalog should identify the SVC Codec information in its codec definition.
 
 * Media producer should map each video atom to the MOQ object in the decode order and can utilize any of the QUIC mapping methods described in {{quic-map}}.
 
-* Dependency information for all the layers (such as spatial/temporal layer identifiers, dependeny descriptions) are encoded in the bistream and/or container for media consumers to ensure sucessfull decoding.
+* Dependency information for all the layers (such as spatial/temporal layer identifiers, dependent descriptions) are encoded in the bitstream and/or container for media consumers to ensure successful decoding.
 
-The scheme to map all the layers to a single track is simple to implement and allows subscibers/media consumers can independently make layer drop decisions without needing any protocol exchanges (as needed in {{simulcast}}). However, such a scheme is constrained by disallowing receivers to subscribers to selectively subscribe to the layers of their interest.
+The scheme to map all the layers to a single track is simple to implement and allows subscribers/media consumers can independently make layer drop decisions without needing any protocol exchanges (as needed in {{simulcast}}). However, such a scheme is constrained by disallowing receivers to subscribers to selectively subscribe to the layers of their interest.
 
 ### One SVC layer per MOQT Track
 
@@ -273,9 +273,9 @@ ex: 2-layer spatial and 2-layer temporal scalability encoding
 
 ~~~
 
-#### Media Producder Properties
+#### Media Producer Properties
 
-The catalog should identify the complete list of dependent tracks for each track that is part of layered coding for a given media stream. For example the figure below shows a sample layer dependency structure (2 spatial and temporal layetrs) and corresponding tracks dependencies.
+The catalog should identify the complete list of dependent tracks for each track that is part of layered coding for a given media stream. For example the figure below shows a sample layer dependency structure (2 spatial and temporal layers) and corresponding tracks dependencies.
 
 
 ~~~ascii-figure
@@ -304,7 +304,7 @@ Catalog Track Dependencies:
 
 Track2 depends on Track1
 Track3 depends on Track1
-Track4 dependson Track2 and Track3   
+Track4 depends on Track2 and Track3   
 
 ~~~
 
@@ -327,7 +327,7 @@ TODO: Add notes from Mo
 
 # Bitrate Adaptation {#abr}
 
-TODO: add considerations for cloent side ABR and possible options for server side ABR.
+TODO: add considerations for client side ABR and possible options for server side ABR.
 
 # Relay Considerations
 
@@ -338,7 +338,7 @@ For example, a well engineered Relay network may choose to take multiple incomin
 
 # Usage mode identification 
 
-This specification explores 2 possible usage modes for applications to conisder using MOQT media delivery protocol :
+This specification explores 2 possible usage modes for applications to consider using MOQT media delivery protocol :
 
 1. Transport Mapping {{quic-map}}
 
@@ -346,9 +346,9 @@ This specification explores 2 possible usage modes for applications to conisder 
 
 For interoperability purposes, media producers should communicate its usage modes to the media consumers. Same can be achieved in one of the following ways
 
-1. Out of band, application specific mechanism. This apporach limits the interoperabiloty across applocations, however.
+1. Out of band, application specific mechanism. This approach limits the interoperability across applications, however.
 
-2. Exchange the usager modes via Catalog. This approach enables consumers of catalog to setup their transport/media stacks appropriately based on the sender's preference.
+2. Exchange the usage modes via Catalog. This approach enables consumers of catalog to setup their transport/media stacks appropriately based on the sender's preference.
 
 
 --- back
