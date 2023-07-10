@@ -5,7 +5,7 @@ docname: draft-mzanaty-moq-loc-latest
 category: info
 submissiontype: IETF
 ipr: trust200902
-submissionType: info
+stand_alone: yes
 author:
 -
     fullname: Mo Zanaty
@@ -20,45 +20,15 @@ author:
     organization: Microsoft
     email: pthatcher@microsoft.com
 normative:
-  MOQT:
-    title: "Media over QUIC Transport"
-    date: May 2023
-    target: https://datatracker.ietf.org/doc/draft-lcurley-moq-transport/
-    authors:
-      - ins: L. Curley
-        name: Luke Curley
-        org: Twitch
-      - ins: K. Pugin
-        name: Kiril Pugin
-        org: Meta
-      -
-        ins: S. Nandakumar
-        name: Suhas Nandakumar
-        org: Cisco Systems
-      -
-        ins: V. Vasiliev
-        name: Victor Vasiliev
-        org: Google
-  Framemarking:
-    title: "Frame Marking RTP Header Extension"
-    date: November 2021
-    target: https://datatracker.ietf.org/doc/draft-ietf-avtext-framemarking/
-    authors:
-      -
-        ins: M. Zanaty
-        name: Mo Zanaty
-        org: Cisco Systems
-      -
-        ins: E. Berger
-        name: Espen Berger
-        org: Cisco Systems
-      -
-        ins: S. Nandakumar
-        name: Suhas Nandakumar
-        org: Cisco Systems
+  MoQTransport: I-D.ietf-moq-transport
+  Framemarking: I-D.ietf-avtext-framemarking
+  WebCodecs: 
+    title: "WebCodecs"
+    date: July 2023
+    target: https://www.w3.org/TR/webcodecs/
   WEBCODECS-CODEC-REGISTRY:
-    title: "Frame Marking RTP Header Extension"
-    date: November 2021
+    title: "WebCodecs Codec Registry"
+    date: July 2023
     target: https://www.w3.org/TR/webcodecs-codec-registry/
 
 informative:
@@ -68,30 +38,47 @@ informative:
 
 This specification describes a media container format for
 encoded and encrypted audio and video media data to be used
-primilarily for interactive media usecases, with the goal of it being
-a low overhead format. It also defines the MOQ Catalog format for publishers
-to annouce their tracks and for subscribers to consume the same.
+primarily for interactive Media over QUIC Transport (MOQT) {{MoQTransport}}, 
+with the goal of it being a low-overhead format. It also defines the
+MOQ Catalog format for publishers to annouce their tracks and for
+subscribers to consume them.
 
 --- middle
 
 # Introduction
 
 This specification describes a low-overhead media container format for
-encoded and encrypted audio and video media data. "Low-overhead" refers to minimal extra
-encapsulation as well as minimal application overhead when interfacing with WebCodecs.
+encoded and encrypted audio and video media data, as well as a MOQ Catalog format to describe such tracks.
+
+"Low-overhead" refers to minimal extra
+encapsulation as well as minimal application overhead when interfacing with WebCodecs {{WebCodecs}}.
 
 The container format description is specified for all audio and video codecs defined in the
-WebCodecs Codec Registry. The audio and video payload bitstream is identical to the internal data
+WebCodecs Codec Registry {{WEBCODECS-CODEC-REGISTRY}}. 
+The audio and video payload bitstream is identical to the "internal data"
 inside an EncodedAudioChunk and EncodedVideoChunk, respectively, specified in the registry.
 
 In addition to the media payloads, critical metadata is also specified for audio and video payloads.
+(Note: Align with MOQT terminology of either "metadata" or "header".)
 
-A primary motivation is to align with media formats used in WebCodecs to minimize application
-overhead when interfacing with WebCodecs. Other container formats like CMAF or RTP would require
+A primary motivation is to align with media formats used in WebCodecs to minimize 
+extra encapsulation and application overhead when interfacing with WebCodecs.
+Other container formats like CMAF or RTP would require
 more extensive application overhead in format conversions, as well as larger encapsultion overhead
 which may burden some use cases like low bitrate audio scenarios.
 
-TODO: Add details on the sections
+This specification can also be used by applications outside the context of WebCodecs or a web browser.
+While the media payloads are defined by referring to the "internal data" of an 
+EncodedAudioChunk or EncodedVideoChunk in the WebCodecs Codec Registry, this "internal data"
+is the elementary bitstream format of codecs without any encapsulation. Referring to the WebCodecs
+Codec Registry avoids duplicating it in an identical IANA registry.
+
+* {{payload}} defines the core media payload formats.
+
+* {{headers}} defines the metadata associated with audio and video payloads.
+
+* {{catalog}} describes the MoQ Catalog format including examples.
+
 
 ## Requirements Notation and Conventions
 
@@ -108,70 +95,67 @@ TODO
 The WebCodecs Codec Registry defines the contents of an EncodedAudioChunk and
 EncodedVideoChunk for the audio and video codec formats in the registry. The
 "internal data" in these chunks is used directly in this specification as
-the payload bitstream.
+the "LOC Payload" bitstream. This "internal data" is the elementary bitstream format
+of each codec without any encapsulation.
 
-An application object when transported as {!MOQT} object is composed of a header
-and its payload. Media objects encoded using the container format defined in this
-specification is shows as below, where in, the `MOQT Object's payload` is composed of
-Loc Payload Header {{headers}} and encoded audio/video media that matches the
-WebCodec EncodedAudioChunk and EncodedVideoChunk encodings respectively.
+For video formats with multiple bitstream formats in the WebCodecs Registry, such as H.264/AVC or H.265/HEVC, the LOC Payload uses the "canonical" format ("avcc" or "hevc", not "annexB") with the following additions:
+* Parameter sets are sent in the bitstream before key frames.
+* 4 byte lengths are sent before each NAL Unit.
+* No start codes or emulation prevention are used in the bitstream.
+* No additional codec configuration information ("extradata") is needed.
+
+## MOQ Object Mapping
+
+An application object when transported as a {{MoQTransport}} object is composed of a MOQ Object Header
+and its Payload. Media objects encoded using the container format defined in this
+specification populate the MOQ Object Payload with a LOC Header and LOC Payload as shown below.
+
+The LOC Payload is the "internal data" of an EncodedAudioChunk or EncodedVideoChunk.
 
 ~~~ ascii-art
 
-+----------------------+----------------+----------------------+
-|   MOQ Object Header  |   LOC Payload  |  EncodedAudioChunk/  |
-|                      |   Header       |  EncodedVideoChunk   |
-+----------------------+----------------+----------------------+
-                        <-------------------------------------->
-                                       MOQ Object Payload
++--------------+----------+-----------+
+|  MOQ Object  |  LOC     |  LOC      |
+|  Header      |  Header  |  Payload  |
++--------------+----------------------+
+               <---------------------->
+                  MOQ Object Payload
 
                   MOQ Object with LOC Container
 
 ~~~
 
-# Payload Header Data {#headers}
+## LOC Header Metadata {#headers}
 
-This section specified metadata that needs to be carried out as payload metadata. Payload
-header data provides necessary information for intermediaries to perform switching decisions
-when the payload is inaccessible, due to encryption.
+The LOC Header carries metadata for the corresponding LOC Payload.
+This metadata provides necessary information for intermediaries such as media switches to
+perform their media switching decisions
+when the payload is inaccessible due to encryption.
 
-Section ((#reg)) provides framework for registering  new payload header fields that aren't
-defined by this specification
+Section {{reg}} provides a framework for registering new LOC Header fields that aren't
+defined by this specification.
 
-## Common Header Data
+### Common Header Data
 
-Following metadata MUST be captured for each media frame
+The following metadata MUST be captured for each media frame.
 
 Sequence Number: Identifies a sequentially increasing variable length integer that is
-incremented per encoded media frame.
+incremented per encoded media frame. This may be replaced with the Object Sequence 
+from the MOQ Object Header in cases where a MOQ Object is exactly one frame.
 
-Capture Timestamp in Microseconds: Captures the wall-clock time of the encoded media frame.
+Capture Timestamp in Microseconds: Captures the wall-clock time of the encoded media frame in a 64-bit unsigned integer.
 
-## Video Header Data
+### Video Header Data
 
 Flags for frames which are independent, discardable, or base layer sync
 points, as well as temporal and spatial layer
-identification. {{!I-D.ietf-avtext-framemarking}} .
+identification. {{Framemarking}} .
 
-1. Does all the tracks go into same decoder or different decoder ?
-   layered -> must go to the same decoder
+### Audio Header Data
 
-2. Multiple tracks
-    how are those mapped on encode side
-    how are these fed into the decoder
+Audio Level: Captures the magnitude of the audio level of the corresponding audio frame encoded in 7 bits as defined in section 3 of {{!RFC6464}}.
 
-3. priority --> idr/not
-
-4.how is group and object number set or intepreted by the middleboxes ( switches not relays)
-
-5. Do we need extension mechanisms , like TLV ..
-
-## Audio Header Data
-
-Audio Level: captures the magnitude of the audio level of the corresponding audio frame and
-values in encoded in 7 bits as defined in the section 3 of {{!RFC6464}}
-
-## Header Data Registration {#reg}
+### Header Data Registration {#reg}
 
 This section details the procedures to register header data fields that might be useful for a
 particular class of media applications.
@@ -189,32 +173,24 @@ Length: Length of metadata value in bytes. (varint)
 Value: Value of metadata. (length bytes)
 
 Registration of type "Specification Required" is followed for registering
-new for header data values.
+new metadata in the LOC Header.
 
 
-# Catalog
+# Catalog {#catalog}
 
-A Catalog is a MOQT Object that provides information about tracks from a given
-publisher. Catalog is used by subscribers for consuming tracks and for publishers
-to advertise the tracks. The content of "Catalog" is opaque to the Relays and may
-be end to end encrypted. Catalog provides the details of tracks such as Track IDs
-and corresponding media configuration details (audio/video codec detail,
-gamestate encoding details,for example).
+A Catalog is a MOQT Object that provides information about tracks from a given publisher. Catalog is used by subscribers for consuming tracks and for publishers
+to advertise the tracks. The content of "Catalog" is opaque to the Relays and may be end to end encrypted. Catalog provides the details of tracks such as Track IDs and corresponding media configuration details (audio/video codec detail, gamestate encoding details, for example)
 
 ## Catalog Fields
 
-At the minumum catalog MUST provide enough information about MOQ Tracks, such as
-its identifier, information about media for the track, for the consumers to
-make appropriate subscription decisions. Following subsections identify
-the mandatory `base` fields and optional `extensions` fields that describe
-a given publisher's track in the catalog.
+At the minumum catalog MUST provide enough information about MOQ Tracks, such as its full name, information about media for the track and mode of usage of the underlying QUIC transport. Following subsections identify the mandatory {{base}} fields and optional {{extensions}} fields that describe a given publisher's track in the catalog. However, the application is free to add further fields than the ones defined in this specification.
 
-### Base Fields
+### Base Fields {#base}
 
 This section identifies the mandatory fields needs to be defined per track listed in the catalog.
 
-* Track Namespace: See section 2.3 of {{MOQT}}
-* Track Name: See section 2.3 of {{MOQT}}
+* Track Namespace: See section 2.3 of {{MoQTransport}}
+* Track Name: See section 2.3 of {{MoQTransport}}
 * Track Qualiity Profile: See {{profile}}
 * Relation: See {{relations}}
 
@@ -226,30 +202,31 @@ document.
 | Track Namespace | ns    |  AV        |   String  |
 | Track Name      | tn    |  AV        |   String  |
 | QualityProfile  | qp    | See {{profile}}        |
-| Relation        | rel   | See {{relations}}      |
 
-### Extension Fields
+### Extension Fields {#extensions}
 
-* Temporal ID: TODO
+Following optional extension fields may be supported by the applocation.
 
-* Spatial ID: TODO
+* Temporal ID: Identifies the temporal layer/sub-layer encoded, starting with 0 for the base layer, and increasing with higher temporal fidelity.
 
-* Depend: TODO
+* Spatial ID: Identifies the spatial and quality layer encoded, starting with 0 for the base layer, and increasing with higher fidelity.
 
+* Depend: Identifies track dependencies for a given track.
+
+* Relation: See {{relations}}.
 
 
 Table 2 provides label and type identification for
 the extension fields
-
 
 | Name            | Label | Media Type | JSON Type |
 |:================|:======|:===========|:==========|
 | Temporal ID     | tid    |  V        |   String  |
 | Spatial ID      | lid    |  V        |   String  |
 | Depend          | dep    |  V        |   Array   |
+| Relation        | rel   | See {{relations}}      |
 
 
-TODO: Define a TLV strucuture.
 
 ### Track Quality Profile {#profile}
 
@@ -286,10 +263,6 @@ document with their respective labels, applicable media types and data types.
 | DisplayWidth  | dw    |  V         |   Number  |
 | DisplayHeight | dh    |  V         |   Number  |
 
-For details of the JSON representation, see Section {{json}}; for
-Raw binary, see Section {{binary}}.
-
-TODO: Define CBOR encoding.
 
 ### Track Relations {#relations}
 
@@ -304,25 +277,24 @@ property. Following relation types are defined in this document.
 
 * lip-sync: Indicates a synchronized playout of the media
   from the tracks identified. Example audio and video media
-  sync for playout in a conference setting.
+  synced for playout in a conference setting.
 
 * layered: Indicates tracks are dependent via layered encoding
   and applies to video tracks. Each track that is part of the
-  layered relation set MUST include depend quality profile
-  property except the base layer.
+  layered relation set MUST include `depend`field listing the 
+  dependencies.
 
 
-CMAF defines the following logical media objects:
+Table 4 lists relation fields defined by this
+document with their respective labels, applicable media types and data types.
 
-CMAF track, which contains encoded samples of media, such as video, audio, and subtitles, with a CMAF header and fragments. The samples are stored in a CMAF-specified container based on the ISO Base Media File Format (ISO BMFF). You can also protect media samples by means of MPEG Common Encryption (COMMON ENC).
 
-CMAF switching set, which contains alternative tracks with different resolutions and bitrates for adaptive streaming, which you can splice in at the boundaries of CMAF fragments.
+| Name          | Label | Media Type | JSON Type |
+|:==============|:======|:===========|:==========|
+| lip-sync      | ls    |  AV        |   Array   |
+| layered       | ly    |  V         |   Number  |
+| time-aligned  | ta    |  AV        |   Number  |
 
-Aligned CMAF switching set, which contains switching sets from the same source through alternative encodings (e.g., with different codecs), which are time-aligned to one another.
-
-CMAF selection set, which contains switching sets in the same media format. That format might contain different content, such as alternative camera angles or languages; or different encodings, such as alternative codecs.
-
-CMAF presentation, which contains one or more presentation time-synchronized selection sets.
 
 
 ## Catalog Retrieval
@@ -331,18 +303,16 @@ On a successful connection setup, subscribers proceed by retrieving the
 catalog (if not already retrieved), subscribing to the tracks of
 their interest and consuming the data published as detailed below.
 
-
 Catalogs are identifed as a special track, with its `Track Name` as "catalog".
 Catalog objects are retrieved by subscribing to its `Full Track Name`  over
-its own MoQ control channel. I
+its own MoQ control channel (Bidirectional QUIC Stream). I
 
 A successfull subscription will lead to one or more catalog
-objects being published on a single unidirectional data stream.
-Successfull subscriptions implies authorization for subscribing
+objects being published and implies authorization for subscribing
 to the tracks in the catalog.
 
 Unsuccessful subscriptions MUST result in closure of the
-Moqsession, followed by reporting the error obtained
+MOQT session, followed by reporting the error obtained
 to the application.
 
 Catalog Objects obtained MUST parse successfully, otherwise
@@ -350,67 +320,72 @@ MUST be treated as error, thus resulting the closure of the
 WebTransport session.
 
 
-# Catalog Encoding
+## Catalog Examples
 
-## JSON Representation {#json}
+The following section provides JSON examples of the catalog. 
 
-TODO
+### Lip Sync Audio/Video Tracks with single quality
 
-```
+This example shows catalog for the media sender, Alice, capable 
+of sending audio and video tracks and share lip-sync relation. 
+
+~~~json
 {
 
- "publications": [
-  {
-    mediaType: "video",
-    trackNamespace: "track-namespace",
-    trackName: "main-audio",
-    "qualityProfile": "codec=av01.0.08M.10.0.110.09,width=1920,height=1080,framerate=30,br=100"
-  },
+  "ls": ["audio", "video"],
+  [
+    {
+      "ns": "conference.example.com/conference123/alice",
+      "n": "video",
+      "qp": "cs=av01.0.08M.10.0.110.09,wd=1920,ht=1080,fr=30"
+    },
+    {
+      "ns": "conference.example.com/conference123/alice",
+      "n": "audio",
+      "qp": "cs=opus,sr=48000,cc=2"
+    }
  ],
 }
 
-```
+~~~
 
 
-## Raw Binary Representation {#binary}
+### Simulcast video tracks - 3 qualities
 
-TODO
+This example shows catalog for the media sender, Alice, capable 
+of sending 3 video tracks for high definition, low definition and 
+medium definition qualities in time-aligned relation.
 
-```
-CATALOG payload {
-  media format type (i), // 0x02
-  version (i),
-  parent object sequence (i), --> // replace this with group/object semantics
-  track change count (i),
-  track change descriptors (..)
+
+~~~json
+{
+
+  "ta": ["hd", "sd", "md"],
+  [
+    {
+      "ns": "conference.example.com/conference123/alice",
+      "n": "hd",
+      "qp": "cs=av01,wd=1920,ht=1080,fr=30"
+    },
+    {
+      "ns": "conference.example.com/conference123/alice",
+      "n": "md",
+      "qp": "cs=av01,wd=720,ht=640,fr=30"
+    },
+    {
+      "ns": "conference.example.com/conference123/alice",
+      "n": "sd",
+      "qp": "cs=av01,wd=192,ht=144,fr=30"
+    }
+ ],
 }
 
-Track Change Descriptor {
-  full track name length (i),
-  full track name (..),
-  operation (1),
-  relation(...), <layered, simulcast, lip-sync>
-  codecConfig: webcodec's codec config
-}
-
-Extensions:
-    track media container format
-        default: container-less/loc
-        options: cmaf
-
-qualityprofile -> maximum decoder limits for a given codec and the quality being advertised.
-
-TrackABC
-Track123
-    repalces: trackABC
-```
-
-
+~~~
 
 # Payload Encryption
 
 When end to end encryption is supported, the encoded payload is encrypted
-with keys from symmetric keying mechanisms, such a MLS, and the payload itself is protected using SFrame or equivalent.
+with keys from symmetric keying mechanisms, such a MLS, and the payload itself is protected using SFrame or other schemes similar schemes.
 
 # Container Serialization
 
@@ -428,18 +403,13 @@ with the header data as additional data input.
 ~~~
 
 
-
-# MOQ Transport Mapping
-
-TODO
-
 # Security Considerations
 
 TODO
 
 # IANA Considerations {#iana}
 
-TODO on specification required for metadata registration.
+A new IANA registry for LOC Header Metadata is defined and populated with the information in section {{reg}}. Specification required for new metadata registration.
 
 --- back
 
