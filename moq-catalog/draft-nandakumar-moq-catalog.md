@@ -32,8 +32,6 @@ author:
 normative:
   MoQTransport: I-D.ietf-moq-transport
   Framemarking: I-D.ietf-avtext-framemarking
-
-informative:
   WebCodecs:
     title: "WebCodecs"
     date: July 2023
@@ -42,6 +40,10 @@ informative:
     title: "WebCodecs Codec Registry"
     date: July 2023
     target: https://www.w3.org/TR/webcodecs-codec-registry/
+  CMAF:
+    title: "Information technology -- Multimedia application format (MPEG-A) -- Part 19: Common media application format (CMAF) for segmented media"
+    date: 2020-03
+informative:
 
 
 --- abstract
@@ -58,7 +60,6 @@ MOQT [MOQTransport] defines a media transport protocol that utilizes the QUIC ne
 This specification defines JSON encoded Catalog.
 
 * {{catalog}} describes the MoQ Catalog format including examples.
-* {{packaging}} describes various packaging form
 
 # Conventions and Definitions
 
@@ -124,21 +125,21 @@ the extension fields
 | Temporal ID     | tid    |  V        |   String  |
 | Spatial ID      | lid    |  V        |   String  |
 | Depend          | dep    |  V        |   Array   |
-| Init Data       |         See {{initdata}}       |
+| Init Data       |         See {{init-data}}      |
 | Relation        |         See {{relations}}      |
 
 
 ### Track Operations {#operations}
 
-Each track description can specify an optional operation value that identifies 
-the catalog producer's intent. Track operation is a enumeration of values 
-as defined below. 
+Each track description can specify an optional operation value that identifies
+the catalog producer's intent. Track operation is a enumeration of values
+as defined below.
 
 * Add: Indicates the track is added to the catalog and the consumers of the
  catalog can start consuming the media by subscribing to the track.
 
-* Delete: Indicates that media producder is no longer producing media on the 
-associated track. Subscribers MUST cleanup any local resources for the 
+* Delete: Indicates that media producder is no longer producing media on the
+associated track. Subscribers MUST cleanup any local resources for the
 track and discard any media received on the track with this operation.
 
 Folowing table defines the numerica values for the track operations.
@@ -218,7 +219,7 @@ document with their respective labels, applicable media types and data types.
 | simulcast     | sim    |  V       |   Array  |
 
 
-## Track Init Data {{init-data}}
+## Track Init Data {#init-data}
 
 | Name          | Label | Media Type | JSON Type |
 |:==============|:======|:===========|:==========|
