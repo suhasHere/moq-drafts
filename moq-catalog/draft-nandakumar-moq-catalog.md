@@ -46,17 +46,19 @@ informative:
 
 --- abstract
 
-Media over QUIC Transport (MOQT) defines a publish/subscribe based unified media delivery protocol for delivering media for streaming and interactive applications over QUIC. This specification defines an interoperable Catalog specification for streaming formats implementing the MoQ Base Protocol.
+Media over QUIC Transport (MOQT) defines a publish/subscribe based unified media delivery protocol for delivering media for streaming and interactive applications over QUIC. This specification defines an interoperable Catalog specification for streaming formats implementing the MOQ Transport Protocol.
 
 --- middle
 
 # Introduction
 
-The MOQ Base Protocol [MOQTransport] defines a media transport protocol that utilizes the QUIC network protocol [QUIC] and WebTransport[WebTrans] to move objects between publishers, subscribers and intermediaries. Subscription IDs are used to identify available tracks.  The mapping of media characteristics to objects, as well as relative prioritization of those objects, is defined by a separate MoQ Streaming Format specification. Multiple streaming formats can operate concurrently over MoQ base protocol. Each streaming format defines its own catalog definition. This document provides normative requirements for these catalog definitions to ensure their compatibility across networks implementing the MoQ Base Protocol.
+MOQT [MOQTransport] defines a media transport protocol that utilizes the QUIC network protocol [QUIC] and WebTransport[WebTrans] to move objects between publishers, subscribers and intermediaries. Track IDs are used to identify available tracks.  The mapping of media characteristics to objects, as well as relative prioritization of those objects, is defined by a separate MoQ Streaming Format specification. Each streaming format identifies c Multiple streaming formats can operate concurrently over MoQT protocol. This document specifies
+ normative requirements for these catalog definitions to ensure their compatibility across networks implementing the MoQ Base Protocol.
 
+This specification defines JSON encoded Catalog.
 
 * {{catalog}} describes the MoQ Catalog format including examples.
-* {{packaging}} describes
+* {{packaging}} describes various packaging form
 
 # Conventions and Definitions
 
@@ -64,12 +66,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 ## Terminology
 
- - Catalog - a Track with a reserved Track ID within an emission or MoQSession that defines the availability of other Tracks.
- - Emission - a collection of Tracks under a common prioritization and orchestration domain.
- - MoQ Base Protocol (MBP) - a media transport protocol that utilizes the QUIC network protocol [QUIC] and WebTransport[WebTrans] to move objects between publishers, subscribers and intermediaries
- - MoQ Streaming Format - a specification which defines how to stream media over the MoQ Base Protocol. It includes a catalog definition, a mapping of media to the protocol objects, prioritization rules and additional business logic.
- - Track - a sequence of Objects within MBP
- - Track ID - a string concatenation of a globally unique provider identifier and a "Track Name".
+TODO
 
 # Catalog {#catalog}
 
@@ -89,6 +86,7 @@ This section identifies the mandatory fields needs to be defined per track liste
 * Track Namespace: See section 2.3 of {{MoQTransport}}
 * Track Name: See section 2.3 of {{MoQTransport}}
 * Track Quality Profile: See {{profile}}
+* Track Operation: see {operations}
 * Relation: See {{relations}}
 
 Table 1 provides an overview of all base fields defined by this
@@ -98,6 +96,8 @@ document.
 |:================|:======|:===========|:==========|
 | Track Namespace | ns    |  AV        |   String  |
 | Track Name      | tn    |  AV        |   String  |
+| Track Priority  | p     |  AV        |   Number  |
+| Track Operation | op    |  AV        |   Number  |
 | QualityProfile  | qp    | See {{profile}}        |
 
 ### Extension Fields {#extensions}
@@ -123,9 +123,25 @@ the extension fields
 | Temporal ID     | tid    |  V        |   String  |
 | Spatial ID      | lid    |  V        |   String  |
 | Depend          | dep    |  V        |   Array   |
-| InitData        |         See {{initdata}}       |
+| Init Data       |         See {{initdata}}       |
 | Relation        |         See {{relations}}      |
 
+
+### Track Operations {#operations}
+
+Each track description can specify an optional operation value that identifies 
+the catalog producer's intent. Track operation is a enumeration of values 
+as defined below. 
+
+| Name            | Value |      Description             |
+|:================|:======|:===========|:================|
+| Add             | 1     |  Adds a new track            |
+| Delete          | 2     |  Remove the track            |
+| Update          | 3     |  Update the track description|
+
+* Operation Add
+
+Section XXX specifices IANA registration procedures for the same.
 
 ### Track Quality Profile {#profile}
 
