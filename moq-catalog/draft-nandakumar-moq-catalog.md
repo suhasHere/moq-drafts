@@ -191,13 +191,13 @@ document with their respective labels, applicable media types and data types.
 Tracks can express dependency on other tracks via relations
 property. Following relation types are defined in this document.
 
-* time-aligned: Indicates set of tracks that share the same time
+* simulcast: Indicates set of tracks that share the same time
   offset when producing the media as well as considered as
   having same time offset when consuming the media. Typical
   example would be simulcasting a camera capture across multiple
   encoding qualities.
 
-* lip-sync: Indicates a synchronized playout of the media
+* time-aligned: Indicates a synchronized playout of the media
   from the tracks identified. Example audio and video media
   synced for playout in a conference setting.
 
@@ -213,9 +213,9 @@ document with their respective labels, applicable media types and data types.
 
 | Name          | Label | Media Type | JSON Type |
 |:==============|:======|:===========|:==========|
-| lip-sync      | ls    |  AV        |   Array   |
+| time-aligned  | ta    |  AV        |   Array   |
 | layered       | ly    |  V         |   Number  |
-| time-aligned  | ta    |  AV        |   Number  |
+| simulcast     | sim    |  V       |   Array  |
 
 
 ## Track Init Data {{init-data}}
@@ -263,7 +263,7 @@ of sending audio and video tracks and share lip-sync relation.
 ~~~json
 {
 
-  "ls": ["audio", "video"],
+  "ta": ["audio", "video"],
   [
     {
       "ns": "conference.example.com/conference123/alice",
@@ -292,7 +292,7 @@ medium definition qualities in time-aligned relation.
 ~~~json
 {
 
-  "ta": ["hd", "sd", "md"],
+  "sim": ["hd", "sd", "md"],
   [
     {
       "ns": "conference.example.com/conference123/alice",
