@@ -89,6 +89,7 @@ This section identifies the mandatory fields needs to be defined per track liste
 * Track Operation: see {operations}
 * Relation: See {{relations}}
 
+
 Table 1 provides an overview of all base fields defined by this
 document.
 
@@ -133,13 +134,19 @@ Each track description can specify an optional operation value that identifies
 the catalog producer's intent. Track operation is a enumeration of values 
 as defined below. 
 
-| Name            | Value |      Description             |
-|:================|:======|:===========|:================|
-| Add             | 1     |  Adds a new track            |
-| Delete          | 2     |  Remove the track            |
-| Update          | 3     |  Update the track description|
+* Add: Indicates the track is added to the catalog and the consumers of the
+ catalog can start consuming the media by subscribing to the track.
 
-* Operation Add
+* Delete: Indicates that media producder is no longer producing media on the 
+associated track. Subscribers MUST cleanup any local resources for the 
+track and discard any media received on the track with this operation.
+
+Folowing table defines the numerica values for the track operations.
+
+| Name            | Value |
+|:================|:======|
+| Add             | 1     |
+| Delete          | 2     |
 
 Section XXX specifices IANA registration procedures for the same.
 
@@ -306,32 +313,6 @@ medium definition qualities in time-aligned relation.
 }
 
 ~~~
-
-
-## Catalog payload structure
-
-The payload of a Catalog Object consists of two components - a two octet header defining the type, followed by the variable length body.
-
-        +---------------+--------------------+
-        |  0x01 - 0x02  |  Type designator   |
-        |  0x03 -       |       Body         |
-        +---------------+--------------------+
-
-To understand the type of catalog object, a receiver would read the first two octets of the object payload and interpret them as an integer in the range  0x0000 - 0xFFFF. This would define the Streaming Format of the catalog object, which in turn would define the serialization of the body, allowing the receiver to parse the body and extract the internal information.
-
-A Catalog specification MUST define the binary serialization of the body. This serialization may vary between streaming formats and there is no requirement to standardize how the data within the body is represented.
-
-
-## Catalog dependency
-
-The first Catalog object in any group sequence MUST be independent of any other catalog object. Subsequent catalog objects within the same group sequence MAY be dependent on the prior catalog objects within the same group.
-
-# MOQT Streaming Formats
-
-## WARP Streaming Format
-
-
-## LOC Streaming Format
 
 
 # Security Considerations
