@@ -1,5 +1,5 @@
 ---
-title: "Catalog Specification for MoQ compliant streaming formats"
+title: "Catalog Specification for Media Over QUIC Transport"
 abbrev: "catalog moq"
 category: info
 
@@ -23,11 +23,6 @@ author:
     fullname: Suhas Nandakumar
     organization: Cisco
     email: snandaku@cisco.com
-
- -
-    fullname: Will Law
-    organization: Akamai
-    email: wilaw@akamai.com
 
 normative:
   MoQTransport: I-D.ietf-moq-transport
