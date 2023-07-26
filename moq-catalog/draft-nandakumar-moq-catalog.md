@@ -24,6 +24,18 @@ author:
     organization: Cisco
     email: snandaku@cisco.com
 
+ -
+    fullname: Will Law
+    organization: Akamai
+    email: wilaw@akamai.com
+
+-
+    fullname: Mo Zanaty
+    organization: Cisco
+    email: mzanaty@cisco.com
+
+
+
 normative:
   MoQTransport: I-D.ietf-moq-transport
   Framemarking: I-D.ietf-avtext-framemarking
