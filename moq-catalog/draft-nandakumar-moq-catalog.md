@@ -29,11 +29,10 @@ author:
     organization: Akamai
     email: wilaw@akamai.com
 
--
+ -
     fullname: Mo Zanaty
     organization: Cisco
     email: mzanaty@cisco.com
-
 
 
 normative:
@@ -61,10 +60,7 @@ Media over QUIC Transport (MOQT) defines a publish/subscribe based unified media
 
 # Introduction
 
-MOQT [MOQTransport] defines a media transport protocol that utilizes the QUIC network protocol [QUIC] and WebTransport[WebTrans] to move objects between publishers, subscribers and intermediaries. Track IDs are used to identify available tracks.  The mapping of media characteristics to objects, as well as relative prioritization of those objects, is defined by a separate MoQ Streaming Format specification. Each streaming format identifies c Multiple streaming formats can operate concurrently over MoQT protocol. This document specifies
- normative requirements for these catalog definitions to ensure their compatibility across networks implementing the MoQ Base Protocol.
-
-This specification defines JSON encoded Catalog.
+MOQT [MOQTransport] defines a media transport protocol that utilizes the QUIC network protocol [QUIC] and WebTransport[WebTrans] to move objects between publishers, subscribers and intermediaries. Track IDs are used to identify available tracks.  MOQT Catalog captures details of media producer's tracks such as their identities, media profiles and relationships, for example. The mapping of media characteristics of objects with the tracks, as well as relative prioritization of those objects, are captured in separate MoQ Streaming Format specifications. This specification defines JSON encoded catalog.
 
 * {{catalog}} describes the MoQ Catalog format including examples.
 
@@ -72,9 +68,6 @@ This specification defines JSON encoded Catalog.
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119 [RFC2119].
 
-## Terminology
-
-TODO
 
 # Catalog {#catalog}
 
@@ -258,6 +251,8 @@ Catalog Objects obtained MUST parse successfully, otherwise
 MUST be treated as error, thus resulting the closure of the
 WebTransport session.
 
+## Catalog Updates
+TODO
 
 ## Catalog Examples
 
