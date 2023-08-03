@@ -49,18 +49,20 @@ normative:
   CMAF:
     title: "Information technology -- Multimedia application format (MPEG-A) -- Part 19: Common media application format (CMAF) for segmented media"
     date: 2020-03
+  JSON: RFC8259
+
 informative:
 
 
 --- abstract
 
-Media over QUIC Transport (MOQT) defines a publish/subscribe based unified media delivery protocol for delivering media for streaming and interactive applications over QUIC. This specification defines an interoperable Catalog specification for streaming formats implementing the MOQ Transport Protocol.
+Media over QUIC Transport (MOQT) defines a publish/subscribe based unified media delivery protocol for delivering media for streaming and interactive applications over QUIC. This specification defines an interoperable Catalog specification for streaming formats implementing the MOQ Transport Protocol [MOQTransport]. The Catalog describes the content made available by a publisher, including information necessary for track selection, subscription and initialization. 
 
 --- middle
 
 # Introduction
 
-MOQT [MOQTransport] defines a media transport protocol that utilizes the QUIC network protocol [QUIC] and WebTransport[WebTrans] to move objects between publishers, subscribers and intermediaries. Track IDs are used to identify available tracks.  MOQT Catalog captures details of media producer's tracks such as their identities, media profiles and relationships, for example. The mapping of media characteristics of objects with the tracks, as well as relative prioritization of those objects, are captured in separate MoQ Streaming Format specifications. This specification defines JSON encoded catalog.
+MOQT [MOQTransport] defines a transport protocol that utilizes the QUIC network protocol [QUIC] and WebTransport[WebTrans] to move objects between publishers, subscribers and intermediaries. Tracks are identified using a tuple of the the Track Namespace and the Track Name. A MOQT Catalog is a specialized track which captures details of all the tracks output by a publisher, including the identities, media profiles, initialization data and inter-track relationships. The mapping of media characteristics of objects with the tracks, as well as relative prioritization of those objects, are captured in separate MoQ Streaming Format specifications. This specification defines a JSON encoded catalog.
 
 * {{catalog}} describes the MoQ Catalog format including examples.
 
@@ -71,19 +73,20 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 # Catalog {#catalog}
 
-A Catalog is a MOQT Object that provides information about tracks from a given publisher. Catalog is used by subscribers for consuming tracks and for publishers
-to advertise the tracks. The content of "Catalog" is opaque to the Relays and may be end to end encrypted. Catalog provides the details of tracks such as Track IDs and corresponding media configuration details (audio/video codec detail, gamestate encoding details, for example)
+A Catalog is a MOQT Object that provides information about tracks from a given publisher. A Catalog is used by publishers for advertising their output and for subscribers to consume that output. The payload of the Catalog object is opaque to Relays and can be end-to-end encrypted. The Catalog provides the names and namespaces of the tracks being produced, along with the relationship between tracks, properties of the tracks that consumers may use for selection and any releavnt initialization data. 
 
 ## Catalog Fields
 
-At the minumum catalog MUST provide enough information about MOQ Tracks, such as its full name, information about media for the track and mode of usage of the underlying QUIC transport. Following subsections identify the mandatory {{base}} fields and optional {{extensions}} fields that describe a given publisher's track in the catalog. The applications is free to add further fields to the catalog that is deemed necessary than the ones defined in this specification and they don't need to be standardized.
+A catalog is a JSON [JSON] document, comprised of a series of mandatory and optional fields. At a minumum, a catalog MUST provide all mandatory fields. A producer MAY add additional fields to the ones described in this draft. Custom field names MUST NOT collide with field names described in this draft. To prevent custom field name collisions with future versions, custom field names SHOULD be prefixed using reverse domain name notation e.g "com.example-size".
 
-TODO: Describe mechanics for preventing field name conflicts for future extensions and for application specific extensions.
+A parser MUST ignore fields it does not understand. 
 
 ### Base Fields {#base}
 
 This section identifies the mandatory fields needs to be defined per track listed in the catalog.
 
+* Streaming Format
+* Streaming format version
 * Track Namespace: See section 2.3 of {{MoQTransport}}
 * Track Name: See section 2.3 of {{MoQTransport}}
 * Track Quality Profile: See {{profile}}
@@ -91,16 +94,34 @@ This section identifies the mandatory fields needs to be defined per track liste
 * Relation: See {{relations}}
 
 
-Table 1 provides an overview of all base fields defined by this
-document.
+Table 1 provides an overview of all fields defined by this document.
 
-| Name            | Label | Media Type | JSON Type |
-|:================|:======|:===========|:==========|
-| Track Namespace | ns    |  AV        |   String  |
-| Track Name      | tn    |  AV        |   String  |
-| Track Priority  | p     |  AV        |   Number  |
-| Track Operation | op    |  AV        |   Number  |
-| QualityProfile  | qp    | See {{profile}}        |
+| Field                   |  Name  | Required |  Location |  JSON type |       Definition       |
+|:========================|:=======|:=========|:==========|:===========|:=======================|
+| Streaming format        | f      |  yes     |   R       |  Number    | See {#streamingformat} |
+| Streaming format version| v      |  yes     |   R       |  String    |
+| Tracks                  | tracks |  yes     |   R       |  Array     |
+| Track Namespace         | ns     |  yes     |   RT      |  String    |
+| Packaging               | p      |  yes     |   RT      |  String    |
+| Track Name              | n      |  yes     |   T       |  String    |
+| Track Priority          | p      |  opt     |   T       |  Number    |
+| Track Operation         | op     |  yes     |   T       |  Number    |
+| Render group            | gr     |  opt     |   T       |  Number    |
+| Alternate group         | alt    |  opt     |   T       |  Number    |
+| Initialization data     | ind    |  opt     |   T       |  String    |
+| Initialization track    | int    |  opt     |   T       |  String    |
+| Selection parameters    | sp     |  opt     |   T       |  String    |
+| Temporal ID             | tid    |  opt     |   T       |  Number    |
+| Spatial ID              | sid    |  opt     |   T       |  Number    |
+| Dependencies            | dep    |  opt     |   T       |  Array     |
+| Inter-track relation    | dep    |  opt     |   T       |  String    |
+
+Required: 'yes' indicates a mandatory field, 'opt' indicates an optional field
+Location: 'R' - the field is located in the root of the JSON object. 'T' - the field is located in a Track object 'RT' - the field may be located in either the root or a track object. 
+
+### Streaming format {#streamingformat}
+A number indicating the streaming format type. The streaming format type number is extracted from the IANA Every MoQ Streaming Format normaitvely referencing this catalog format See {#iana} for additional details.  
+
 
 ### Extension Fields {#extensions}
 
@@ -136,7 +157,7 @@ the catalog producer's intent. Track operation is a enumeration of values
 as defined below.
 
 * Add: Indicates the track is added to the catalog and the consumers of the
- catalog can start consuming the media by subscribing to the track.
+ catalog may subscribe to the track.
 
 * Delete: Indicates that media producder is no longer producing media on the
 associated track. Subscribers MUST cleanup any local resources for the
@@ -147,7 +168,7 @@ Folowing table defines the numerica values for the track operations.
 | Name            | Value |
 |:================|:======|
 | Add             | 1     |
-| Delete          | 2     |
+| Delete          | 0     |
 
 Section XXX specifices IANA registration procedures for the same.
 
@@ -324,11 +345,11 @@ The catalog payload type header MUST NOT be encrypted. The catalog payload body 
 
 # IANA Considerations {#iana}
 
-This section details how the Type of the Catalog format that can be registered.  The type registry can be updated by incrementally expanding the type space, i.e., by allocating and reserving new type identifiers.  As per [RFC8126], this section details the creation of the "MoQ Base Protocol Catalog Type" registry.
+This section details how the Type of the Catalog format that can be registered.  The type registry can be updated by incrementally expanding the type space, i.e., by allocating and reserving new type identifiers.  As per [RFC8126], this section details the creation of the "MoQ Streaming Format Type" registry.
 
-## Catalog Type Registry
+## MoQ Streaming Format Type Registry
 
-This document creates a new registry, "MoQ Base Protocol Catalog Type".  The registry policy is "RFC Required".  The Type value is 2 octets.  The range is 0x0000-0xFFFF. The initial entry in the registry is:
+This document creates a new registry, "MoQ Streaming Format Type".  The registry policy is "RFC Required".  The Type value is 2 octets.  The range is 0x0000-0xFFFF. The initial entry in the registry is:
 
          +--------+-------------+----------------------------------+
          | Type   |     Name    |            RFC                   |
@@ -336,7 +357,7 @@ This document creates a new registry, "MoQ Base Protocol Catalog Type".  The reg
          | 0x0000 |   Reserved  |                                  |
          +--------+-------------+----------------------------------+
 
-
+Every MoQ streaming format draft normatively referencing this catalog format MUST register itself a unique type identifier. 
 
 # Acknowledgments
 {:numbered="false"}
