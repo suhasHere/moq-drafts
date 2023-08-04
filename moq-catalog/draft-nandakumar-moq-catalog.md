@@ -79,7 +79,7 @@ A Catalog is a MOQT Object that provides information about tracks from a given p
 
 ## Catalog Fields
 
-A catalog is a JSON [JSON] document, comprised of a series of mandatory and optional fields. At a minumum, a catalog MUST provide all mandatory fields. A producer MAY add additional fields to the ones described in this draft. Custom field names MUST NOT collide with field names described in this draft. To prevent custom field name collisions with future versions, custom field names SHOULD be prefixed using reverse domain name notation e.g "com.example-size".
+A catalog is a JSON [JSON] document, comprised of a series of mandatory and optional fields. At a minumum, a catalog MUST provide all mandatory fields. A producer MAY add additional fields to the ones described in this draft. Custom field names MUST NOT collide with field names described in this draft. To prevent custom field name collisions with future versions, custom field names SHOULD be prefixed using reverse domain name notation e.g "com.example-size". The order of field names within the JSON document is not important.
 
 A parser MUST ignore fields it does not understand. 
 
@@ -96,6 +96,7 @@ Table 1 provides an overview of all fields defined by this document.
 | Simulcast               | sim    |  opt     |   R       |  Array     | See {#simulcast}              |
 | Track namespace         | ns     |  yes     |   RT      |  String    | See {#tracknamespace}         |
 | Packaging               | p      |  yes     |   RT      |  String    | See {#packaging}              |
+| Selection parameters    | sp     |  opt     |   RT      |  Object    | See {#selectionparameters}    |
 | Track name              | n      |  yes     |   T       |  String    | See {#trackname}              |
 | Track operation         | op     |  yes     |   T       |  Number    | See {#trackoperations}        |
 | Track priority          | p      |  opt     |   T       |  Number    | See {#trackpriority}          |
@@ -104,7 +105,6 @@ Table 1 provides an overview of all fields defined by this document.
 | Alternate group         | alt    |  opt     |   T       |  Number    | See {#altgroup}               |
 | Initialization data     | ind    |  opt     |   T       |  String    | See {#initdata}               |
 | Initialization track    | int    |  opt     |   T       |  String    | See {#inittrack}              |
-| Selection parameters    | sp     |  opt     |   T       |  Object    | See {#selectionparameters}    |
 | Temporal ID             | tid    |  opt     |   T       |  Number    | See {#temporalid}             |
 | Spatial ID              | sid    |  opt     |   T       |  Number    | See {#spatialid}              |
 | Codec                   | cs     |  opt     |   S       |  String    | See {#codec}                  |
@@ -197,7 +197,7 @@ A string holding Base64 [BASE64] encoded initialization data for the track.
 A string specifying the track name of another track which holds initialization data for the current track. Note that initialization tracks SHOULD NOT delcare alternate group and render group bindings. 
 
 ### Selection parameters {#selectionparameters}
-An object holding a series of name/value pairs which a subscriber can use to select tracks for subscription. If present, the selection parameters object MUST NOT be empty. 
+An object holding a series of name/value pairs which a subscriber can use to select tracks for subscription. If present, the selection parameters object MUST NOT be empty. Any selection parameters declared at the root level are inherited by all tracks. A selection parameters object may exist at both the root and track level. The additive combination of the parameters 
 
 ### Codec {#codec}
 A string defining the codec used to encode the track.
@@ -262,7 +262,7 @@ The following rules MUST be followed by subscribers in processing delta updates
 
 The following section provides non-normative JSON examples of various catalogs comopliant with this draft. .
 
-TOD: update examples to show new formatting
+TODO: add examples to show CMAF, mixed format, delat updates. 
 
 ### Lip Sync Audio/Video Tracks with single quality
 
@@ -271,20 +271,23 @@ of sending audio and video tracks and share lip-sync relation.
 
 ~~~json
 {
-
+  "f": 1,
+  "v": "0.2",
+  "ns": "conference.example.com/conference123/alice",
+  "p": "loc",
   "ta": ["audio", "video"],
-  [
+  "tracks": [
     {
-      "ns": "conference.example.com/conference123/alice",
       "n": "video",
-      "qp": "cs=av01.0.08M.10.0.110.09,wd=1920,ht=1080,fr=30"
+      "sp":{"cs":"av01.0.08M.10.0.110.09","wd":1920,"ht":1080,"fr":30},
+      "gr":1
     },
     {
-      "ns": "conference.example.com/conference123/alice",
       "n": "audio",
-      "qp": "cs=opus,sr=48000,cc=2"
+      "sp":{"cs":"opus","sr":48000,"cc":2},
+      "gr":1
     }
- ],
+   ]
 }
 
 ~~~
@@ -300,25 +303,29 @@ medium definition qualities in time-aligned relation.
 
 ~~~json
 {
-
+  "f": 1,
+  "v": "0.2",
+  "ns": "conference.example.com/conference123/alice",
+  "sp": {"cs":"av01","fr":30},
   "sim": ["hd", "sd", "md"],
-  [
+  "tracks":[
     {
-      "ns": "conference.example.com/conference123/alice",
+     
       "n": "hd",
-      "qp": "cs=av01,wd=1920,ht=1080,fr=30"
+      "sp": {"wd":1920,"ht":1080},
+      "alt":1
     },
     {
-      "ns": "conference.example.com/conference123/alice",
       "n": "md",
-      "qp": "cs=av01,wd=720,ht=640,fr=30"
+      "sp": {"wd":720,"ht":640},
+      "alt":1
     },
     {
-      "ns": "conference.example.com/conference123/alice",
       "n": "sd",
-      "qp": "cs=av01,wd=192,ht=144,fr=30"
+      "sp": {"wd":192,"ht":144},
+      "alt":1
     }
- ],
+   ]
 }
 
 ~~~
