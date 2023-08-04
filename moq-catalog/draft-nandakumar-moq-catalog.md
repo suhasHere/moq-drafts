@@ -50,6 +50,8 @@ normative:
     title: "Information technology -- Multimedia application format (MPEG-A) -- Part 19: Common media application format (CMAF) for segmented media"
     date: 2020-03
   JSON: RFC8259
+  BASE64: RFC4648
+  LANG: RFC5646
 
 informative:
 
@@ -81,76 +83,77 @@ A catalog is a JSON [JSON] document, comprised of a series of mandatory and opti
 
 A parser MUST ignore fields it does not understand. 
 
-### Base Fields {#base}
-
-This section identifies the mandatory fields needs to be defined per track listed in the catalog.
-
-* Streaming Format
-* Streaming format version
-* Track Namespace: See section 2.3 of {{MoQTransport}}
-* Track Name: See section 2.3 of {{MoQTransport}}
-* Track Quality Profile: See {{profile}}
-* Track Operation: see {operations}
-* Relation: See {{relations}}
-
-
 Table 1 provides an overview of all fields defined by this document.
 
-| Field                   |  Name  | Required |  Location |  JSON type |       Definition       |
-|:========================|:=======|:=========|:==========|:===========|:=======================|
-| Streaming format        | f      |  yes     |   R       |  Number    | See {#streamingformat} |
-| Streaming format version| v      |  yes     |   R       |  String    |
-| Tracks                  | tracks |  yes     |   R       |  Array     |
-| Track Namespace         | ns     |  yes     |   RT      |  String    |
-| Packaging               | p      |  yes     |   RT      |  String    |
-| Track Name              | n      |  yes     |   T       |  String    |
-| Track Priority          | p      |  opt     |   T       |  Number    |
-| Track Operation         | op     |  yes     |   T       |  Number    |
-| Render group            | gr     |  opt     |   T       |  Number    |
-| Alternate group         | alt    |  opt     |   T       |  Number    |
-| Initialization data     | ind    |  opt     |   T       |  String    |
-| Initialization track    | int    |  opt     |   T       |  String    |
-| Selection parameters    | sp     |  opt     |   T       |  String    |
-| Temporal ID             | tid    |  opt     |   T       |  Number    |
-| Spatial ID              | sid    |  opt     |   T       |  Number    |
-| Dependencies            | dep    |  opt     |   T       |  Array     |
-| Inter-track relation    | dep    |  opt     |   T       |  String    |
+| Field                   |  Name  | Required |  Location |  JSON type |           Definition          |
+|:========================|:=======|:=========|:==========|:===========|:==============================|
+| Streaming format        | f      |  yes     |   R       |  Number    | See {#streamingformat}        |
+| Streaming format version| v      |  yes     |   R       |  String    | See {#streamingformatversion} |
+| Tracks                  | tracks |  yes     |   R       |  Array     | See {#tracks}                 |
+| Parent sequence number  | psn    |  opt     |   R       |  Array     | See {#parentsequencenumber}   |
+| Time-aligned            | ta     |  opt     |   R       |  Array     | See {#timealigned}            |
+| Layered                 | ly     |  opt     |   R       |  Array     | See {#layered}                |
+| Simulcast               | sim    |  opt     |   R       |  Array     | See {#simulcast}              |
+| Track namespace         | ns     |  yes     |   RT      |  String    | See {#tracknamespace}         |
+| Packaging               | p      |  yes     |   RT      |  String    | See {#packaging}              |
+| Track name              | n      |  yes     |   T       |  String    | See {#trackname}              |
+| Track operation         | op     |  yes     |   T       |  Number    | See {#trackoperations}        |
+| Track priority          | p      |  opt     |   T       |  Number    | See {#trackpriority}          |
+| Track label             | lb     |  opt     |   T       |  String    | See {#tracklabel}             |
+| Render group            | gr     |  opt     |   T       |  Number    | See {#rendergroup}            |
+| Alternate group         | alt    |  opt     |   T       |  Number    | See {#altgroup}               |
+| Initialization data     | ind    |  opt     |   T       |  String    | See {#initdata}               |
+| Initialization track    | int    |  opt     |   T       |  String    | See {#inittrack}              |
+| Selection parameters    | sp     |  opt     |   T       |  Object    | See {#selectionparameters}    |
+| Temporal ID             | tid    |  opt     |   T       |  Number    | See {#temporalid}             |
+| Spatial ID              | sid    |  opt     |   T       |  Number    | See {#spatialid}              |
+| Codec                   | cs     |  opt     |   S       |  String    | See {#codec}                  |
+| Framerate               | fr     |  opt     |   S       |  Number    | See {#framerate}              |
+| Bitrate                 | br     |  opt     |   S       |  Number    | See {#bitrate}                |
+| Width                   | wd     |  opt     |   S       |  Number    | See {#width}                  |
+| Height                  | ht     |  opt     |   S       |  Number    | See {#height}                 |
+| Samplerate              | sr     |  opt     |   S       |  Number    | See {#samplerate}             |
+| Channel count           | cc     |  opt     |   S       |  Number    | See {#channelcount}           |
+| Display width           | dw     |  opt     |   S       |  Number    | See {#displaywidth}           |
+| Display height          | dh     |  opt     |   S       |  Number    | See {#displayheight}          |
+| Language                | la     |  opt     |   S       |  String    | See {#language}               |
+
 
 Required: 'yes' indicates a mandatory field, 'opt' indicates an optional field
-Location: 'R' - the field is located in the root of the JSON object. 'T' - the field is located in a Track object 'RT' - the field may be located in either the root or a track object. 
+Location: 'R' - the field is located in the root of the JSON object, 'T' - the field is located in a Track object,  'RT' - the field may be located in either the root or a track object, "S" - the field is located in the Selection Properties object.  
 
 ### Streaming format {#streamingformat}
-A number indicating the streaming format type. The streaming format type number is extracted from the IANA Every MoQ Streaming Format normaitvely referencing this catalog format See {#iana} for additional details.  
+A number indicating the streaming format type.  Every MoQ Streaming Format normatively referencing this catalog format MUST register itself in the "MoQ Streaming Format Type" table.  See {#iana} for additional details.  
 
+### Streaming format version {#streamingformatversion}
+A string indicating the version of the streaming format to which this catalog applies. The structure of the version string is defined by the streaming format. 
 
-### Extension Fields {#extensions}
+### Tracks {#tracks}
+An array of track objects {#trackobject}
 
-Following optional extension fields may be supported by the application.
+### Parent sequence number {#parentsequencenumber}
+A number specifying the moq-transport object number from which this catalog represents a delta update. See {#deltaupdate} for additional details. Absence of this parent sequence number indicates that this catalog is independent and completely describes the content available in the broadcast. 
 
-* Temporal ID: Identifies the temporal layer/sub-layer encoded, starting with 0 for the base layer, and increasing with higher temporal fidelity.
+### Tracks object {#trackobject}
+A track object is a collection of fields whose location is specified as 'T' or 'RT' in Table 1. 
 
-* Spatial ID: Identifies the spatial and quality layer encoded, starting with 0 for the base layer, and increasing with higher fidelity.
+### Track namespace {#tracknamespace}
+The name space under which the track name is defined. See section 2.3 of {{MoQTransport}}. The track namespace is required to be specified for each track object. If the track namespace is declared in the root of the JSON document, then its value is inherited by all tracks and it does not need to be re-declared within each track object. A namesapce declared in a track object overwrites any inherited name sapce. 
 
-* Depend: Identifies track dependencies for a given track.
+### Packaging {#packaging}
+A string defining the type of payload encapsulation. Allowed values are strings as defined in Table 2.
 
-* InitData : See {{init-data}}.
+Table 2: Allowed packaging values
 
-* Relation: See {{relations}}.
+| Name            |   Value   |      Draft       |
+|:================|:==========|:=================|
+| CMAF            | "cmaf"    | See RFC XXXX     |
+| LOC             | "loc"     | See RFC XXXX     |
 
+### Track name {#trackname}
+A string defining the name of the track. See section 2.3 of {{MoQTransport}}
 
-Table 2 provides label and type identification for
-the extension fields
-
-| Name            | Label | Media Type | JSON Type |
-|:================|:======|:===========|:==========|
-| Temporal ID     | tid    |  V        |   String  |
-| Spatial ID      | lid    |  V        |   String  |
-| Depend          | dep    |  V        |   Array   |
-| Init Data       |         See {{init-data}}      |
-| Relation        |         See {{relations}}      |
-
-
-### Track Operations {#operations}
+### Track operations {#operations}
 
 Each track description can specify an optional operation value that identifies
 the catalog producer's intent. Track operation is a enumeration of values
@@ -160,124 +163,106 @@ as defined below.
  catalog may subscribe to the track.
 
 * Delete: Indicates that media producder is no longer producing media on the
-associated track. Subscribers MUST cleanup any local resources for the
-track and discard any media received on the track with this operation.
+associated track.
 
-Folowing table defines the numerica values for the track operations.
+A catalog update in which all previously added tracks are deleted SHOULD be interpreted by a subscriber to indicate that the publisher has terminated the broadcast. 
 
-| Name            | Value |
-|:================|:======|
-| Add             | 1     |
-| Delete          | 0     |
+Folowing Table 3 defines the numerical values for the track operations.
 
-Section XXX specifices IANA registration procedures for the same.
+Table 3: Allowed track operations
 
-### Track Quality Profile {#profile}
+| Name            | Value | Default value  |
+|:================|:======|:===============|
+| Add             | 1     |    yes         |
+| Delete          | 0     |                |
 
-Each track has an associated quality profile that describes the
-media objects for that track. Following properties identify
-a track's quality profile.
+The default track operation is 'Add'. This value does not need to be declared in the track object. 
 
-* Codec: Codec information as defined by the codec registrations listed in {{WEBCODECS-CODEC-REGISTRY}}.
+### Track priority {#trackpriority}
+A number indicating the relative priority of the track. See section X.X of {{MoQTransport}}.
 
-* Framerate: As defined in section 7.8 of {{WEBCODECS-CODEC-REGISTRY}}.
+### Track label {#tracklabel}
+A string defining a human-readable label for the track. Examples might be "Overhead camera view" or "Deutscher Kommentar"
 
-* Bitrate: As defined in section 7.7 and 7.8 of {{WEBCODECS-CODEC-REGISTRY}}.
+### Render group {#rendergroup}
+An integer specifying a group of tracks which are designed to be rendered together. Tracks with the same group number SHOULD be rendered simultaneously and are designed to accompmnay one another. A common example would be tying together audio and video tracks. 
 
-* SampleRate: As defined in section 7.7 of {{WEBCODECS-CODEC-REGISTRY}}.
+### Alternate group {#altgroup}
+An integer specifying a group of tracks which are alternate versions of one-another. A subscriber SHOULD only subscribe to one track from a set of tracks specifying the same alternate group number. A common example would be a video tracks of the same content offered in alternate bitrates. 
 
-* Width,Height: As defined in section 7.8 of {{WEBCODECS-CODEC-REGISTRY}}.
+### Initialization data {#initdata}
+A string holding Base64 [BASE64] encoded initialization data for the track. 
 
-* ChanelCount: As defined in section 7.7 of {{WEBCODECS-CODEC-REGISTRY}}.
+### Initialization track {#inittrack}
+A string specifying the track name of another track which holds initialization data for the current track. Note that initialization tracks SHOULD NOT delcare alternate group and render group bindings. 
 
-* DisplayWidth, DisplayHeight: As defined in section 7.7 of {{WEBCODECS-CODEC-REGISTRY}}.
+### Selection parameters {#selectionparameters}
+An object holding a series of name/value pairs which a subscriber can use to select tracks for subscription. If present, the selection parameters object MUST NOT be empty. 
 
-Table 3 provides an overview of all QualityProfile fields defined by this
-document with their respective labels, applicable media types and data types.
+### Codec {#codec}
+A string defining the codec used to encode the track.
+For LOC packaged content, the string codec registrations are defined in Sect 3 and Section 4 of {{WEBCODECS-CODEC-REGISTRY}}.
+For CMAF packaged content, the string codec registrations are defined in XXX.
 
-| Name          | Label | Media Type | JSON Type |
-|:==============|:======|:===========|:==========|
-| Codec         | cs    |  AV        |   String  |
-| Framerate     | fr    |  V         |   Number  |
-| Bitrate       | br    |  AV        |   Number  |
-| Width         | wd    |  V         |   Number  |
-| Height        | ht    |  V         |   Number  |
-| SampleRate    | sr    |  A         |   Number  |
-| ChanelCount   | cc    |  A         |   Number  |
-| DisplayWidth  | dw    |  V         |   Number  |
-| DisplayHeight | dh    |  V         |   Number  |
+### Framerate {#framerate}
+A number defining the framerate of the track, expressed as frames per second.
 
+### Bitrate {#bitrate}
+A number defining the bitrate of track, expressed in bits second. 
 
-### Track Relations {#relations}
+### Samplerate {#bitrate}
+The number of frame samples per second. This property SHOULD only accompany audio codecs. 
 
-Tracks can express dependency on other tracks via relations
-property. Following relation types are defined in this document.
+### Width {#width}
+A number expressing the encoded width of the track content in pixels.
 
-* simulcast: Indicates set of tracks that share the same time
-  offset when producing the media as well as considered as
-  having same time offset when consuming the media. Typical
-  example would be simulcasting a camera capture across multiple
-  encoding qualities.
+### Height {#height}
+A number expressing the encoded height of the video frames in pixels.
 
-* time-aligned: Indicates a synchronized playout of the media
-  from the tracks identified. Example audio and video media
-  synced for playout in a conference setting.
+### Channel count {#channelcount}
+The number of audio channels. This property SHOULD only accompany audio codecs. 
 
-* layered: Indicates tracks are dependent via layered encoding
-  and applies to video tracks. Each track that is part of the
-  layered relation set MUST include `depend` field listing the
-  dependencies.
+### Display width {#displaywidth}
+A number expressing the intended display width of the track content in pixels. 
 
+### Display height {#displayheight}
+A number expressing the intended display height of the track content in pixels. 
 
-Table 4 lists relation fields defined by this
-document with their respective labels, applicable media types and data types.
+### Language {#language}
+A string defining the dominant language of the track. The string MUST be one of the standard Tags for Identifying Languages as defined by [LANG].
 
+### Temporal ID {#temporalid}
+A number identifying the temporal layer/sub-layer encoding of the track, starting with 0 for the base layer, and increasing with higher temporal fidelity.
 
-| Name          | Label | Media Type | JSON Type |
-|:==============|:======|:===========|:==========|
-| time-aligned  | ta    |  AV        |   Array   |
-| layered       | ly    |  V         |   Number  |
-| simulcast     | sim    |  V       |   Array  |
+### Spatial ID {#spatialid}
+A number identifying the spatial layer encoding of the track, starting with 0 for the base layer, and increasing with higher fidelity.
 
+### Time aligned  {#timealigned}
+An array of track names intended for synchronized playout. An example would be audio and video media synced for playout in a conference setting.
+TODO - are these the same as groups?
 
-## Track Init Data {#init-data}
+### Layered {#layered}
+An array of track names that are dependent on one another for decoding. Each track included in this layered relation set MUST include include either a temporal ID {#temporalid} or a spatial ID {#spatialid} as a track property. 
 
-| Name          | Label | Media Type | JSON Type |
-|:==============|:======|:===========|:==========|
-| init-data     | init    |  AV      |   Array   |
+### Simulcast  {#simulcast}
+An array of tracks that share the same time offset when producing the media as well as the same time offset when consuming the media. An example would be tracks representing camera capture across multiple encoding qualities.
+TODO - are these the same as alternates?
 
+## Catalog Delta Updates
+A catalog may contain incremental changes. This is a useful property if many tracks may be initially declared but then there are small chnages to a subset of tracks. The producer can issue a delta update to describe these small changes. Changes are described incrementally, meaning that a delta-update may itself depend on a previous delta update. 
 
-* init-data: The init payload MUST consist of a File Type Box (ftyp) followed by a Movie Box (moov). This Movie Box (moov) consists of Movie Header Boxes (mvhd), Track Header Boxes (tkhd), Track Boxes (trak), followed by a final Movie Extends Box (mvex). These boxes MUST NOT contain any samples and MUST have a duration of zero. A Common Media Application Format Header {{CMAF}} meets all these requirements.
-
-
-## Catalog Retrieval
-
-On a successful connection setup, subscribers proceed by retrieving the
-catalog (if not already retrieved), subscribing to the tracks of
-their interest and consuming the data published as detailed below.
-
-Catalogs are identified as a special track, with its `Track Name` as "catalog".
-Catalog objects are retrieved by subscribing to its `Full Track Name`  over
-its own MoQ control channel (Bidirectional QUIC Stream). I
-
-A successful subscription will lead to one or more catalog
-objects being published and implies authorization for subscribing
-to the tracks in the catalog.
-
-Unsuccessful subscriptions MUST result in closure of the
-MOQT session, followed by reporting the error obtained
-to the application.
-
-Catalog Objects obtained MUST parse successfully, otherwise
-MUST be treated as error, thus resulting the closure of the
-WebTransport session.
-
-## Catalog Updates
-TODO
+The following rules MUST be followed by subscribers in processing delta updates
+* If a catalog is received without the parent sequence number field {#parentsequencenumber} defined, then it is an independent catalog and no delta update processing is required.
+* If a catalog is received with a parent sequence number field present, then the content of the catalog MUST be parsed as if the catalog contents had been added to the contents received on the referenced moq-transport object. Newer field definitions overwrite older field definitions.
+* Track namespaces may not be changed across delta updates. 
+* Contents of the track selection properties object may not be varied across updates. To adjust a track selection property, the track must first be removed and then added with the new selection properties and a different name.
+* Track names may not be changed across delta updates. To change a track name, remove the track and then add a new track with the new name and matching properties. 
 
 ## Catalog Examples
 
-The following section provides JSON examples of the catalog.
+The following section provides non-normative JSON examples of various catalogs comopliant with this draft. .
+
+TOD: update examples to show new formatting
 
 ### Lip Sync Audio/Video Tracks with single quality
 
@@ -345,7 +330,7 @@ The catalog payload type header MUST NOT be encrypted. The catalog payload body 
 
 # IANA Considerations {#iana}
 
-This section details how the Type of the Catalog format that can be registered.  The type registry can be updated by incrementally expanding the type space, i.e., by allocating and reserving new type identifiers.  As per [RFC8126], this section details the creation of the "MoQ Streaming Format Type" registry.
+This section details how the MoQ Streaming Format Type can be registered.  The type registry can be updated by incrementally expanding the type space, i.e., by allocating and reserving new type identifiers.  As per [RFC8126], this section details the creation of the "MoQ Streaming Format Type" registry.
 
 ## MoQ Streaming Format Type Registry
 
