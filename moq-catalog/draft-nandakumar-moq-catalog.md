@@ -64,7 +64,7 @@ Media over QUIC Transport (MOQT) defines a publish/subscribe based unified media
 
 # Introduction
 
-MOQT [MOQTransport] defines a transport protocol that utilizes the QUIC network protocol [QUIC] and WebTransport[WebTrans] to move objects between publishers, subscribers and intermediaries. Tracks are identified using a tuple of the the Track Namespace and the Track Name. A MOQT Catalog is a specialized track which captures details of all the tracks output by a publisher, including the identities, media profiles, initialization data and inter-track relationships. The mapping of media characteristics of objects with the tracks, as well as relative prioritization of those objects, are captured in separate MoQ Streaming Format specifications. This specification defines a JSON encoded catalog.
+MOQT [MOQTransport] defines a transport protocol that utilizes the QUIC network protocol [QUIC] and WebTransport[WebTrans] to move objects between publishers, subscribers and intermediaries. Tracks are identified using a tuple of the Track Namespace and the Track Name. A MOQT Catalog is a specialized track which captures details of all the tracks output by a publisher, including the identities, media profiles, initialization data and inter-track relationships. The mapping of media characteristics of objects with the tracks, as well as relative prioritization of those objects, are captured in separate MoQ Streaming Format specifications. This specification defines a JSON encoded catalog.
 
 * {{catalog}} describes the MoQ Catalog format including examples.
 
@@ -75,11 +75,11 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 # Catalog {#catalog}
 
-A Catalog is a MOQT Object that provides information about tracks from a given publisher. A Catalog is used by publishers for advertising their output and for subscribers to consume that output. The payload of the Catalog object is opaque to Relays and can be end-to-end encrypted. The Catalog provides the names and namespaces of the tracks being produced, along with the relationship between tracks, properties of the tracks that consumers may use for selection and any releavnt initialization data. 
+A Catalog is a MOQT Object that provides information about tracks from a given publisher. A Catalog is used by publishers for advertising their output and for subscribers to consume that output. The payload of the Catalog object is opaque to Relays and can be end-to-end encrypted. The Catalog provides the names and namespaces of the tracks being produced, along with the relationship between tracks, properties of the tracks that consumers may use for selection and any relevant initialization data. 
 
 ## Catalog Fields
 
-A catalog is a JSON [JSON] document, comprised of a series of mandatory and optional fields. At a minumum, a catalog MUST provide all mandatory fields. A producer MAY add additional fields to the ones described in this draft. Custom field names MUST NOT collide with field names described in this draft. To prevent custom field name collisions with future versions, custom field names SHOULD be prefixed using reverse domain name notation e.g "com.example-size". The order of field names within the JSON document is not important. Any track field declared at the root level is inherited by all tracks. Any track field declared within a track overwrites any inherited value. 
+A catalog is a JSON [JSON] document, comprised of a series of mandatory and optional fields. At a minimum, a catalog MUST provide all mandatory fields. A producer MAY add additional fields to the ones described in this draft. Custom field names MUST NOT collide with field names described in this draft. To prevent custom field name collisions with future versions, custom field names SHOULD be prefixed using reverse domain name notation e.g "com.example-size". The order of field names within the JSON document is not important. Any track field declared at the root level is inherited by all tracks. Any track field declared within a track overwrites any inherited value. 
 
 A parser MUST ignore fields it does not understand. 
 
@@ -138,7 +138,7 @@ A number specifying the moq-transport object number from which this catalog repr
 
 
 ### Track namespace {#tracknamespace}
-The name space under which the track name is defined. See section 2.3 of {{MoQTransport}}. The track namespace is required to be specified for each track object. If the track namespace is declared in the root of the JSON document, then its value is inherited by all tracks and it does not need to be re-declared within each track object. A namesapce declared in a track object overwrites any inherited name space.
+The name space under which the track name is defined. See section 2.3 of {{MoQTransport}}. The track namespace is required to be specified for each track object. If the track namespace is declared in the root of the JSON document, then its value is inherited by all tracks and it does not need to be re-declared within each track object. A namespace declared in a track object overwrites any inherited name space.
 
 ### Track name {#trackname}
 A string defining the name of the track. See section 2.3 of {{MoQTransport}}
@@ -164,12 +164,12 @@ as defined below.
 * Add: Indicates the track is added to the catalog and the consumers of the
  catalog may subscribe to the track.
 
-* Delete: Indicates that media producder is no longer producing media on the
+* Delete: Indicates that media producer is no longer producing media on the
 associated track.
 
 A catalog update in which all previously added tracks are deleted SHOULD be interpreted by a subscriber to indicate that the publisher has terminated the broadcast. 
 
-Folowing Table 3 defines the numerical values for the track operations.
+Table 3 defines the numerical values for the track operations.
 
 Table 3: Allowed track operations
 
@@ -187,19 +187,19 @@ A number indicating the relative priority of the track. See section X.X of {{MoQ
 A string defining a human-readable label for the track. Examples might be "Overhead camera view" or "Deutscher Kommentar". Note that {{JSON}} spec requires UTF-8 support by decoders. 
 
 ### Render group {#rendergroup}
-An integer specifying a group of tracks which are designed to be rendered together. Tracks with the same group number SHOULD be rendered simultaneously and are designed to accompmnay one another. A common example would be tying together audio and video tracks. 
+An integer specifying a group of tracks which are designed to be rendered together. Tracks with the same group number SHOULD be rendered simultaneously and are designed to accompany one another. A common example would be tying together audio and video tracks. 
 
 ### Alternate group {#altgroup}
 An integer specifying a group of tracks which are alternate versions of one-another. Alternate tracks represent the same media content, but differ in their selection properties. Alternate tracks SHOULD have matching framerate {{framerate}} and media time sequences.  A subscriber SHOULD only subscribe to one track from a set of tracks specifying the same alternate group number. A common example would be a video tracks of the same content offered in alternate bitrates. 
 
 ### Dependencies {#dependencies}
-Certain tracks may depend on other tracks for decoding. Dependices holds an array of track names {{trackname}} on which the current track is dependent. Since only the track name is signalled, the namespace of the dependencies is assumed to match that of the track declaring the dependencies. 
+Certain tracks may depend on other tracks for decoding. Dependencies holds an array of track names {{trackname}} on which the current track is dependent. Since only the track name is signaled, the namespace of the dependencies is assumed to match that of the track declaring the dependencies. 
 
 ### Initialization data {#initdata}
 A string holding Base64 [BASE64] encoded initialization data for the track. 
 
 ### Initialization track {#inittrack}
-A string specifying the track name of another track which holds initialization data for the current track. Note that initialization tracks SHOULD NOT delcare alternate group and render group bindings. 
+A string specifying the track name of another track which holds initialization data for the current track. Note that initialization tracks SHOULD NOT declare alternate group and render group bindings. 
 
 ### Selection parameters {#selectionparameters}
 An object holding a series of name/value pairs which a subscriber can use to select tracks for subscription. If present, the selection parameters object MUST NOT be empty. Any selection parameters declared at the root level are inherited by all tracks. A selection parameters object may exist at both the root and track level. Any declaration of a selection parameter at the track level overrides the inherited root value. 
@@ -247,7 +247,7 @@ An array of track names intended for synchronized playout. An example would be a
 TODO - are these the same as groups?
 
 ## Catalog Delta Updates
-A catalog might contain incremental changes. This is a useful property if many tracks may be initially declared but then there are small chnages to a subset of tracks. The producer can issue a delta update to describe these small changes. Changes are described incrementally, meaning that a delta-update can itself depend on a previous delta update. 
+A catalog might contain incremental changes. This is a useful property if many tracks may be initially declared but then there are small changes to a subset of tracks. The producer can issue a delta update to describe these small changes. Changes are described incrementally, meaning that a delta-update can itself depend on a previous delta update. 
 
 The following rules MUST be followed by subscribers in processing delta updates:
 
@@ -260,14 +260,14 @@ The following rules MUST be followed by subscribers in processing delta updates:
 
 ## Catalog Examples
 
-The following section provides non-normative JSON examples of various catalogs comopliant with this draft. .
+The following section provides non-normative JSON examples of various catalogs compliant with this draft.
 
-TODO: add examples to show CMAF, mixed format, delat updates. 
+TODO: add examples to show CMAF, mixed format, delta updates. 
 
 ### Lip Sync Audio/Video Tracks with single quality
 
 This example shows catalog for the media sender, Alice, capable
-of sending audio and video tracks and share lip-sync relation.
+of sending lip-synced audio and video tracks.
 
 ~~~json
 {
