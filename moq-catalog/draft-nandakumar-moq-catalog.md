@@ -79,7 +79,7 @@ A Catalog is a MOQT Object that provides information about tracks from a given p
 
 ## Catalog Fields
 
-A catalog is a JSON [JSON] document, comprised of a series of mandatory and optional fields. At a minumum, a catalog MUST provide all mandatory fields. A producer MAY add additional fields to the ones described in this draft. Custom field names MUST NOT collide with field names described in this draft. To prevent custom field name collisions with future versions, custom field names SHOULD be prefixed using reverse domain name notation e.g "com.example-size". The order of field names within the JSON document is not important.
+A catalog is a JSON [JSON] document, comprised of a series of mandatory and optional fields. At a minumum, a catalog MUST provide all mandatory fields. A producer MAY add additional fields to the ones described in this draft. Custom field names MUST NOT collide with field names described in this draft. To prevent custom field name collisions with future versions, custom field names SHOULD be prefixed using reverse domain name notation e.g "com.example-size". The order of field names within the JSON document is not important. Any track field declared at the root level is inherited by all tracks. Any track field declared within a track overwrites any inherited value. 
 
 A parser MUST ignore fields it does not understand. 
 
@@ -87,40 +87,39 @@ Table 1 provides an overview of all fields defined by this document.
 
 | Field                   |  Name  | Required |  Location |  JSON type |           Definition          |
 |:========================|:=======|:=========|:==========|:===========|:==============================|
-| Streaming format        | f      |  yes     |   R       |  Number    | See {#streamingformat}        |
-| Streaming format version| v      |  yes     |   R       |  String    | See {#streamingformatversion} |
-| Tracks                  | tracks |  yes     |   R       |  Array     | See {#tracks}                 |
-| Parent sequence number  | psn    |  opt     |   R       |  Array     | See {#parentsequencenumber}   |
-| Time-aligned            | ta     |  opt     |   R       |  Array     | See {#timealigned}            |
-| Layered                 | ly     |  opt     |   R       |  Array     | See {#layered}                |
-| Simulcast               | sim    |  opt     |   R       |  Array     | See {#simulcast}              |
-| Track namespace         | ns     |  yes     |   RT      |  String    | See {#tracknamespace}         |
-| Packaging               | p      |  yes     |   RT      |  String    | See {#packaging}              |
-| Selection parameters    | sp     |  opt     |   RT      |  Object    | See {#selectionparameters}    |
-| Track name              | n      |  yes     |   T       |  String    | See {#trackname}              |
-| Track operation         | op     |  yes     |   T       |  Number    | See {#trackoperations}        |
-| Track priority          | p      |  opt     |   T       |  Number    | See {#trackpriority}          |
-| Track label             | lb     |  opt     |   T       |  String    | See {#tracklabel}             |
-| Render group            | gr     |  opt     |   T       |  Number    | See {#rendergroup}            |
-| Alternate group         | alt    |  opt     |   T       |  Number    | See {#altgroup}               |
-| Initialization data     | ind    |  opt     |   T       |  String    | See {#initdata}               |
-| Initialization track    | int    |  opt     |   T       |  String    | See {#inittrack}              |
-| Temporal ID             | tid    |  opt     |   T       |  Number    | See {#temporalid}             |
-| Spatial ID              | sid    |  opt     |   T       |  Number    | See {#spatialid}              |
-| Codec                   | cs     |  opt     |   S       |  String    | See {#codec}                  |
-| Framerate               | fr     |  opt     |   S       |  Number    | See {#framerate}              |
-| Bitrate                 | br     |  opt     |   S       |  Number    | See {#bitrate}                |
-| Width                   | wd     |  opt     |   S       |  Number    | See {#width}                  |
-| Height                  | ht     |  opt     |   S       |  Number    | See {#height}                 |
-| Samplerate              | sr     |  opt     |   S       |  Number    | See {#samplerate}             |
-| Channel count           | cc     |  opt     |   S       |  Number    | See {#channelcount}           |
-| Display width           | dw     |  opt     |   S       |  Number    | See {#displaywidth}           |
-| Display height          | dh     |  opt     |   S       |  Number    | See {#displayheight}          |
-| Language                | la     |  opt     |   S       |  String    | See {#language}               |
+| Streaming format        | f      |  yes     |   R       |  Number    | See {{streamingformat}}        |
+| Streaming format version| v      |  yes     |   R       |  String    | See {{streamingformatversion}} |
+| Tracks                  | tracks |  yes     |   R       |  Array     | See {{tracks}}                 |
+| Parent sequence number  | psn    |  opt     |   R       |  Array     | See {{parentsequencenumber}}   |
+| Layered                 | ly     |  opt     |   R       |  Array     | See {{layered}}                |
+| Track namespace         | ns     |  yes     |   RT      |  String    | See {{tracknamespace}}         |
+| Track name              | n      |  yes     |   RT      |  String    | See {{trackname}}              |
+| Packaging               | p      |  yes     |   RT      |  String    | See {{packaging}}              |
+| Track operation         | op     |  yes     |   RT      |  Number    | See {{trackoperations}}        |
+| Track priority          | p      |  opt     |   RT      |  Number    | See {{trackpriority}}          |
+| Track label             | lb     |  opt     |   RT      |  String    | See {{tracklabel}}             |
+| Render group            | gr     |  opt     |   RT      |  Number    | See {{rendergroup}}            |
+| Alternate group         | alt    |  opt     |   RT      |  Number    | See {{altgroup}}}              |
+| Dependencies            | alt    |  opt     |   RT      |  Array     | See {{dependencies}}}          |
+| Initialization data     | ind    |  opt     |   RT      |  String    | See {{initdata}}               |
+| Initialization track    | int    |  opt     |   RT      |  String    | See {{inittrack}}              |
+| Temporal ID             | tid    |  opt     |   RT      |  Number    | See {{temporalid}}             |
+| Spatial ID              | sid    |  opt     |   RT      |  Number    | See {{spatialid}}              |
+| Selection parameters    | sp     |  opt     |   RT      |  Object    | See {{selectionparameters}}    |
+| Codec                   | cs     |  opt     |   S       |  String    | See {{codec}}                  |
+| Framerate               | fr     |  opt     |   S       |  Number    | See {{framerate}}              |
+| Bitrate                 | br     |  opt     |   S       |  Number    | See {{bitrate}}                |
+| Width                   | wd     |  opt     |   S       |  Number    | See {{width}}                  |
+| Height                  | ht     |  opt     |   S       |  Number    | See {{height}}                 |
+| Audio sample rate       | sr     |  opt     |   S       |  Number    | See {{audiosamplerate}}        |
+| Channel count           | cc     |  opt     |   S       |  Number    | See {{channelcount}}           |
+| Display width           | dw     |  opt     |   S       |  Number    | See {{displaywidth}}           |
+| Display height          | dh     |  opt     |   S       |  Number    | See {{displayheight}}          |
+| Language                | la     |  opt     |   S       |  String    | See {{language}}               |
 
 
 Required: 'yes' indicates a mandatory field, 'opt' indicates an optional field
-Location: 'R' - the field is located in the root of the JSON object, 'T' - the field is located in a Track object,  'RT' - the field may be located in either the root or a track object, "S" - the field is located in the Selection Properties object.  
+Location: 'R' - the field is located in the root of the JSON object, 'RT' - the field may be located in either the root or a track object, "S" - the field is located in the Selection Properties object.  
 
 ### Streaming format {#streamingformat}
 A number indicating the streaming format type.  Every MoQ Streaming Format normatively referencing this catalog format MUST register itself in the "MoQ Streaming Format Type" table.  See {#iana} for additional details.  
@@ -131,14 +130,18 @@ A string indicating the version of the streaming format to which this catalog ap
 ### Tracks {#tracks}
 An array of track objects {#trackobject}
 
+### Tracks object {#trackobject}
+A track object is a collection of fields whose location is specified as 'RT' in Table 1. 
+
 ### Parent sequence number {#parentsequencenumber}
 A number specifying the moq-transport object number from which this catalog represents a delta update. See {#deltaupdate} for additional details. Absence of this parent sequence number indicates that this catalog is independent and completely describes the content available in the broadcast. 
 
-### Tracks object {#trackobject}
-A track object is a collection of fields whose location is specified as 'T' or 'RT' in Table 1. 
 
 ### Track namespace {#tracknamespace}
-The name space under which the track name is defined. See section 2.3 of {{MoQTransport}}. The track namespace is required to be specified for each track object. If the track namespace is declared in the root of the JSON document, then its value is inherited by all tracks and it does not need to be re-declared within each track object. A namesapce declared in a track object overwrites any inherited name sapce. 
+The name space under which the track name is defined. See section 2.3 of {{MoQTransport}}. The track namespace is required to be specified for each track object. If the track namespace is declared in the root of the JSON document, then its value is inherited by all tracks and it does not need to be re-declared within each track object. A namesapce declared in a track object overwrites any inherited name space.
+
+### Track name {#trackname}
+A string defining the name of the track. See section 2.3 of {{MoQTransport}}
 
 ### Packaging {#packaging}
 A string defining the type of payload encapsulation. Allowed values are strings as defined in Table 2.
@@ -150,8 +153,7 @@ Table 2: Allowed packaging values
 | CMAF            | "cmaf"    | See RFC XXXX     |
 | LOC             | "loc"     | See RFC XXXX     |
 
-### Track name {#trackname}
-A string defining the name of the track. See section 2.3 of {{MoQTransport}}
+
 
 ### Track operations {#operations}
 
@@ -182,13 +184,16 @@ The default track operation is 'Add'. This value does not need to be declared in
 A number indicating the relative priority of the track. See section X.X of {{MoQTransport}}.
 
 ### Track label {#tracklabel}
-A string defining a human-readable label for the track. Examples might be "Overhead camera view" or "Deutscher Kommentar"
+A string defining a human-readable label for the track. Examples might be "Overhead camera view" or "Deutscher Kommentar". Note that {{JSON}} spec requires UTF-8 support by decoders. 
 
 ### Render group {#rendergroup}
 An integer specifying a group of tracks which are designed to be rendered together. Tracks with the same group number SHOULD be rendered simultaneously and are designed to accompmnay one another. A common example would be tying together audio and video tracks. 
 
 ### Alternate group {#altgroup}
-An integer specifying a group of tracks which are alternate versions of one-another. A subscriber SHOULD only subscribe to one track from a set of tracks specifying the same alternate group number. A common example would be a video tracks of the same content offered in alternate bitrates. 
+An integer specifying a group of tracks which are alternate versions of one-another. Alternate tracks represent the same media content, but differ in their selection properties. Alternate tracks SHOULD have matching framerate {{framerate}} and media time sequences.  A subscriber SHOULD only subscribe to one track from a set of tracks specifying the same alternate group number. A common example would be a video tracks of the same content offered in alternate bitrates. 
+
+### Dependencies {#dependencies}
+Certain tracks may depend on other tracks for decoding. Dependices holds an array of track names {{trackname}} on which the current track is dependent. Since only the track name is signalled, the namespace of the dependencies is assumed to match that of the track declaring the dependencies. 
 
 ### Initialization data {#initdata}
 A string holding Base64 [BASE64] encoded initialization data for the track. 
@@ -197,7 +202,7 @@ A string holding Base64 [BASE64] encoded initialization data for the track.
 A string specifying the track name of another track which holds initialization data for the current track. Note that initialization tracks SHOULD NOT delcare alternate group and render group bindings. 
 
 ### Selection parameters {#selectionparameters}
-An object holding a series of name/value pairs which a subscriber can use to select tracks for subscription. If present, the selection parameters object MUST NOT be empty. Any selection parameters declared at the root level are inherited by all tracks. A selection parameters object may exist at both the root and track level. The additive combination of the parameters 
+An object holding a series of name/value pairs which a subscriber can use to select tracks for subscription. If present, the selection parameters object MUST NOT be empty. Any selection parameters declared at the root level are inherited by all tracks. A selection parameters object may exist at both the root and track level. Any declaration of a selection parameter at the track level overrides the inherited root value. 
 
 ### Codec {#codec}
 A string defining the codec used to encode the track.
@@ -210,8 +215,8 @@ A number defining the framerate of the track, expressed as frames per second.
 ### Bitrate {#bitrate}
 A number defining the bitrate of track, expressed in bits second. 
 
-### Samplerate {#bitrate}
-The number of frame samples per second. This property SHOULD only accompany audio codecs. 
+### Audio sample rate {#audiosamplerate}
+The number of audio frame samples per second. This property SHOULD only accompany audio codecs. 
 
 ### Width {#width}
 A number expressing the encoded width of the track content in pixels.
@@ -241,22 +246,17 @@ A number identifying the spatial layer encoding of the track, starting with 0 fo
 An array of track names intended for synchronized playout. An example would be audio and video media synced for playout in a conference setting.
 TODO - are these the same as groups?
 
-### Layered {#layered}
-An array of track names that are dependent on one another for decoding. Each track included in this layered relation set MUST include include either a temporal ID {#temporalid} or a spatial ID {#spatialid} as a track property. 
-
-### Simulcast  {#simulcast}
-An array of tracks that share the same time offset when producing the media as well as the same time offset when consuming the media. An example would be tracks representing camera capture across multiple encoding qualities.
-TODO - are these the same as alternates?
-
 ## Catalog Delta Updates
-A catalog may contain incremental changes. This is a useful property if many tracks may be initially declared but then there are small chnages to a subset of tracks. The producer can issue a delta update to describe these small changes. Changes are described incrementally, meaning that a delta-update may itself depend on a previous delta update. 
+A catalog might contain incremental changes. This is a useful property if many tracks may be initially declared but then there are small chnages to a subset of tracks. The producer can issue a delta update to describe these small changes. Changes are described incrementally, meaning that a delta-update can itself depend on a previous delta update. 
 
-The following rules MUST be followed by subscribers in processing delta updates
+The following rules MUST be followed by subscribers in processing delta updates:
+
 * If a catalog is received without the parent sequence number field {#parentsequencenumber} defined, then it is an independent catalog and no delta update processing is required.
 * If a catalog is received with a parent sequence number field present, then the content of the catalog MUST be parsed as if the catalog contents had been added to the contents received on the referenced moq-transport object. Newer field definitions overwrite older field definitions.
 * Track namespaces may not be changed across delta updates. 
 * Contents of the track selection properties object may not be varied across updates. To adjust a track selection property, the track must first be removed and then added with the new selection properties and a different name.
 * Track names may not be changed across delta updates. To change a track name, remove the track and then add a new track with the new name and matching properties. 
+
 
 ## Catalog Examples
 
@@ -279,12 +279,12 @@ of sending audio and video tracks and share lip-sync relation.
   "tracks": [
     {
       "n": "video",
-      "sp":{"cs":"av01.0.08M.10.0.110.09","wd":1920,"ht":1080,"fr":30},
+      "sp":{"cs":"av01.0.08M.10.0.110.09","wd":1920,"ht":1080,"fr":30,"br":1500000},
       "gr":1
     },
     {
       "n": "audio",
-      "sp":{"cs":"opus","sr":48000,"cc":2},
+      "sp":{"cs":"opus","sr":48000,"cc":2,"br":32000},
       "gr":1
     }
    ]
@@ -293,11 +293,11 @@ of sending audio and video tracks and share lip-sync relation.
 ~~~
 
 
-### Simulcast video tracks - 3 qualities
+### Simulcast video tracks - 3 alternate qualities
 
 
 This example shows catalog for the media sender, Alice, capable
-of sending 3 video tracks for high definition, low definition and
+of sending 3 time-aligned video tracks for high definition, low definition and
 medium definition qualities in time-aligned relation.
 
 
@@ -307,22 +307,21 @@ medium definition qualities in time-aligned relation.
   "v": "0.2",
   "ns": "conference.example.com/conference123/alice",
   "sp": {"cs":"av01","fr":30},
-  "sim": ["hd", "sd", "md"],
   "tracks":[
     {
      
       "n": "hd",
-      "sp": {"wd":1920,"ht":1080},
+      "sp": {"wd":1920,"ht":1080,"br":5000000},
       "alt":1
     },
     {
       "n": "md",
-      "sp": {"wd":720,"ht":640},
+      "sp": {"wd":720,"ht":640,"br":3000000},
       "alt":1
     },
     {
       "n": "sd",
-      "sp": {"wd":192,"ht":144},
+      "sp": {"wd":192,"ht":144,"br":500000},
       "alt":1
     }
    ]
