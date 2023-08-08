@@ -52,6 +52,7 @@ normative:
   JSON: RFC8259
   BASE64: RFC4648
   LANG: RFC5646
+  MIME: RFC6838
 
 informative:
 
@@ -102,17 +103,18 @@ Table 1 provides an overview of all fields defined by this document.
 | Alternate group         | alt    |  opt     |   RT      |  Number    | See {{altgroup}}}              |
 | Dependencies            | alt    |  opt     |   RT      |  Array     | See {{dependencies}}}          |
 | Initialization data     | ind    |  opt     |   RT      |  String    | See {{initdata}}               |
-| Initialization track    | int    |  opt     |   RT      |  String    | See {{inittrack}}              |
+| Initialization track    | init   |  opt     |   RT      |  String    | See {{inittrack}}              |
 | Temporal ID             | tid    |  opt     |   RT      |  Number    | See {{temporalid}}             |
 | Spatial ID              | sid    |  opt     |   RT      |  Number    | See {{spatialid}}              |
 | Selection parameters    | sp     |  opt     |   RT      |  Object    | See {{selectionparameters}}    |
-| Codec                   | cs     |  opt     |   S       |  String    | See {{codec}}                  |
+| Codec                   | c      |  opt     |   S       |  String    | See {{codec}}                  |
+| Mime type               | mt     |  opt     |   S       |  String    | See {{mimetype}}               |
 | Framerate               | fr     |  opt     |   S       |  Number    | See {{framerate}}              |
 | Bitrate                 | br     |  opt     |   S       |  Number    | See {{bitrate}}                |
 | Width                   | wd     |  opt     |   S       |  Number    | See {{width}}                  |
 | Height                  | ht     |  opt     |   S       |  Number    | See {{height}}                 |
 | Audio sample rate       | sr     |  opt     |   S       |  Number    | See {{audiosamplerate}}        |
-| Channel count           | cc     |  opt     |   S       |  Number    | See {{channelcount}}           |
+| Channel configuration   | cc     |  opt     |   S       |  String    | See {{channelconfiguration}}   |
 | Display width           | dw     |  opt     |   S       |  Number    | See {{displaywidth}}           |
 | Display height          | dh     |  opt     |   S       |  Number    | See {{displayheight}}          |
 | Language                | la     |  opt     |   S       |  String    | See {{language}}               |
@@ -199,7 +201,7 @@ Certain tracks may depend on other tracks for decoding. Dependencies holds an ar
 A string holding Base64 [BASE64] encoded initialization data for the track. 
 
 ### Initialization track {#inittrack}
-A string specifying the track name of another track which holds initialization data for the current track. Note that initialization tracks SHOULD NOT declare alternate group and render group bindings. 
+A string specifying the track name of another track which holds initialization data for the current track. Initialization tracks MUST NOT be added to the tracks array {{tracks}}. They are referenced only via the initialization track field of the track which they initialize. 
 
 ### Selection parameters {#selectionparameters}
 An object holding a series of name/value pairs which a subscriber can use to select tracks for subscription. If present, the selection parameters object MUST NOT be empty. Any selection parameters declared at the root level are inherited by all tracks. A selection parameters object may exist at both the root and track level. Any declaration of a selection parameter at the track level overrides the inherited root value. 
@@ -208,6 +210,9 @@ An object holding a series of name/value pairs which a subscriber can use to sel
 A string defining the codec used to encode the track.
 For LOC packaged content, the string codec registrations are defined in Sect 3 and Section 4 of {{WEBCODECS-CODEC-REGISTRY}}.
 For CMAF packaged content, the string codec registrations are defined in XXX.
+
+### Mimetype {#mimetype}
+A string defining the mime type [MIME] of the track. This parameter is typically supplied with CMAF packaged content.
 
 ### Framerate {#framerate}
 A number defining the framerate of the track, expressed as frames per second.
@@ -224,8 +229,8 @@ A number expressing the encoded width of the track content in pixels.
 ### Height {#height}
 A number expressing the encoded height of the video frames in pixels.
 
-### Channel count {#channelcount}
-The number of audio channels. This property SHOULD only accompany audio codecs. 
+### Channel configuration {#channelconfiguration}
+A string specifying the audio channel configuration. This property SHOULD only accompany audio codecs. A string is used in order to provide the flexibility to describe complex channel configurations for multi-channel and Next Generation Audio schemas. 
 
 ### Display width {#displaywidth}
 A number expressing the intended display width of the track content in pixels. 
@@ -262,12 +267,11 @@ The following rules MUST be followed by subscribers in processing delta updates:
 
 The following section provides non-normative JSON examples of various catalogs compliant with this draft.
 
-TODO: add examples to show CMAF, mixed format, delta updates. 
 
 ### Lip Sync Audio/Video Tracks with single quality
 
 This example shows catalog for the media sender, Alice, capable
-of sending lip-synced audio and video tracks.
+of sending LOC packaged, lip-synced audio and video tracks.
 
 ~~~json
 {
@@ -275,17 +279,15 @@ of sending lip-synced audio and video tracks.
   "v": "0.2",
   "ns": "conference.example.com/conference123/alice",
   "p": "loc",
-  "ta": ["audio", "video"],
+  "gr":1,
   "tracks": [
     {
       "n": "video",
-      "sp":{"cs":"av01.0.08M.10.0.110.09","wd":1920,"ht":1080,"fr":30,"br":1500000},
-      "gr":1
+      "sp":{"c":"av01.0.08M.10.0.110.09","wd":1920,"ht":1080,"fr":30,"br":1500000}
     },
     {
       "n": "audio",
-      "sp":{"cs":"opus","sr":48000,"cc":2,"br":32000},
-      "gr":1
+      "sp":{"c":"opus","sr":48000,"cc":"2","br":32000}
     }
    ]
 }
@@ -293,12 +295,12 @@ of sending lip-synced audio and video tracks.
 ~~~
 
 
-### Simulcast video tracks - 3 alternate qualities
+### Simulcast video tracks - 3 alternate qualities along with audio
 
 
 This example shows catalog for the media sender, Alice, capable
 of sending 3 time-aligned video tracks for high definition, low definition and
-medium definition qualities in time-aligned relation.
+medium definition qualities, along with an audio track. 
 
 
 ~~~json
@@ -306,33 +308,157 @@ medium definition qualities in time-aligned relation.
   "f": 1,
   "v": "0.2",
   "ns": "conference.example.com/conference123/alice",
-  "sp": {"cs":"av01","fr":30},
+  "sp": {"c":"av01"},
+  "gr": 1,
   "tracks":[
     {
      
       "n": "hd",
-      "sp": {"wd":1920,"ht":1080,"br":5000000},
+      "sp": {"wd":1920,"ht":1080,"br":5000000,"fr":30},
       "alt":1
     },
     {
       "n": "md",
-      "sp": {"wd":720,"ht":640,"br":3000000},
+      "sp": {"wd":720,"ht":640,"br":3000000,"fr":30},
       "alt":1
     },
     {
       "n": "sd",
-      "sp": {"wd":192,"ht":144,"br":500000},
+      "sp": {"wd":192,"ht":144,"br":500000,"fr":30},
       "alt":1
+    },
+    {
+      "n": "audio",
+      "sp":{"c":"opus","sr":48000,"cc":"2","br":32000},
+    }
+   ]
+}
+~~~
+
+### Delta update adding a track
+
+This example shows catalog for the media sender, Alice, adding a slide track to an established video conference
+
+~~~json
+{
+  "psn":0,
+  "tracks": [
+    {
+      "n": "slides",
+      "sp":{"c":"av01.0.08M.10.0.110.09","wd":1920,"ht":1080,"fr":15,"br":750000},
+      "gr":1
     }
    ]
 }
 
 ~~~
 
+### Delta update removing a track
+
+This example shows delat catalog update for the media sender, Alice, removing a slide track from an established video conference
+
+~~~json
+{
+  "psn":1,
+  "tracks": [
+    {
+      "n": "slides",
+      "op": 0
+    }
+   ]
+}
+
+~~~
+
+### Delta update removing all tracks and terminating broadcast
+
+This example shows a delta catalog update for the media sender, Alice, removing all tracks and terminating her broadcast. 
+
+~~~json
+{
+  "psn":2,
+  "op": 0,
+  "tracks": [{"n": "audio"},{"n": "video"},{"n": "slides"}]
+}
+
+~~~
+
+### CMAF Tracks with multiple qualities of audio and video
+
+This example shows catalog for a sports broadcast sending time-aligned audio and video tracks using CMAF packaging. Init segments are delivered as separate tracks. 
+
+~~~json
+{
+  "f": 1,
+  "v": "0.2",
+  "ns": "sports.example.com/games/08-08-23/12345",
+  "p": "cmaf",
+  "gr":1,
+  "tracks": [
+    {
+      "n": "video_4k",
+      "sp":{"c":"avc1.640033","mt":"video/mp4","wd":3840,"ht":2160,"fr":30,"br":14931538},
+      "init":"init_video_4k",
+      "alt": 1
+    },
+    {
+      "n": "video_1080",
+      "sp":{"c":"avc1.640028","mt":"video/mp4","wd":1920,"ht":1080,"fr":30,"br":9914554},
+      "init":"init_video_1080",
+      "alt": 1
+    },
+    {
+      "n": "video_720",
+      "sp":{"c":"avc1.64001f","mt":"video/mp4","wd":1280,"ht":720,"fr":30,"br":4952892},
+      "init":"init_video_720",
+      "alt": 1
+    },
+    {
+      "n": "audio_aac",
+      "sp":{"c":"mp4a.40.5","mt":"audio/mp4","sr":48000,"cc":"2","br":67071},
+      "init":"init_audio_aac",
+      "alt": 2
+    },
+    {
+      "n": "audio_ec3",
+      "sp":{"c":"ec-3","mt":"audio/mp4","sr":48000,"cc":"F801","br":256000},
+      "init":"init_audio_ec3",
+      "alt": 2
+    }
+   ]
+}
+~~~
+
+### Mixed format example - CMAF and LOC packaging in the same catalog
+
+This example shows catalog describing a broadcast with CMAF packaged video and LOC packaged audio. 
+
+~~~json
+{
+  "f": 1,
+  "v": "0.2",
+  "ns": "output.example.com/event/12345",
+  "gr":1
+  "tracks": [
+    {
+      "n": "video0",
+      "sp":{"c":"avc1.64001f","mt":"video/mp4","wd":1280,"ht":720,"fr":30,"br":4952892},
+      "init":"init_video_720",
+      "p":"loc",
+    },
+    {
+      "n": "audio",
+      "sp":{"c":"opus","sr":48000,"cc":"2","br":32000},
+      "p": "loc",
+    }
+   ]
+}
+~~~
+
 
 # Security Considerations
 
-The catalog payload type header MUST NOT be encrypted. The catalog payload body MAY be encrypted.
+The catalog contents MAY be encrypted. The mechanism of encryption and the signalling of the keys are left to the Streaming Format referencing this catalog format. 
 
 # IANA Considerations {#iana}
 
