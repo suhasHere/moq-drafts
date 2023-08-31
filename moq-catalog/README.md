@@ -1,4 +1,4 @@
-# MOQ Usages 
+# MOQ Common Catalog
 
-This is the working area for the individual Internet-Draft, "MOQ Usages for audio and video applications"".
-
+This is work in progress version of common moq catalog format draft that moves
+the catalog content out of MoQ LOC Draft : https://datatracker.ietf.org/doc/draft-mzanaty-moq-loc/
