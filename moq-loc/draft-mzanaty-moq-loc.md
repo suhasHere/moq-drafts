@@ -23,7 +23,13 @@ normative:
   MoQTransport: I-D.ietf-moq-transport
   MoQCatalog: I-D.wilaw-moq-catalogformat
   Framemarking: I-D.ietf-avtext-framemarking
-  WebCodecs: 
+  SecureObjects:
+    title: "Secure Objects for Media over QUIC"
+    target: https://suhashere.github.io/moq-secure-objects/#go.draft-jennings-moq-secure-objects.html
+  MOQ-MLS:
+    title: "Secure Group Key Agreement with MLS over MoQ"
+    target: https://suhashere.github.io/moq-e2ee-mls/draft-jennings-moq-e2ee-mls.html
+  WebCodecs:
     title: "WebCodecs"
     date: July 2023
     target: https://www.w3.org/TR/webcodecs/
@@ -39,7 +45,7 @@ informative:
 
 This specification describes a media container format for
 encoded and encrypted audio and video media data to be used
-primarily for interactive Media over QUIC Transport (MOQT) {{MoQTransport}}, 
+primarily for interactive Media over QUIC Transport (MOQT) {{MoQTransport}},
 with the goal of it being a low-overhead format. It also defines the
 LOC Streaming Format for the MOQ Common Catalog format {{MoQCatalog}}
 for publishers to annouce and describe their LOC tracks and for
@@ -55,21 +61,21 @@ encoded and encrypted audio and video media data, as well as a MOQ Common Catalo
 "Low-overhead" refers to minimal extra encapsulation as well as minimal application overhead when interfacing with WebCodecs {{WebCodecs}}.
 
 The container format description is specified for all audio and video codecs defined in the
-WebCodecs Codec Registry {{WEBCODECS-CODEC-REGISTRY}}. 
+WebCodecs Codec Registry {{WEBCODECS-CODEC-REGISTRY}}.
 The audio and video payload bitstream is identical to the "internal data"
 inside an EncodedAudioChunk and EncodedVideoChunk, respectively, specified in the registry.
 
 In addition to the media payloads, critical metadata is also specified for audio and video payloads.
 (Note: Align with MOQT terminology of either "metadata" or "header".)
 
-A primary motivation is to align with media formats used in WebCodecs to minimize 
+A primary motivation is to align with media formats used in WebCodecs to minimize
 extra encapsulation and application overhead when interfacing with WebCodecs.
 Other container formats like CMAF or RTP would require
 more extensive application overhead in format conversions, as well as larger encapsultion overhead
 which may burden some use cases like low bitrate audio scenarios.
 
 This specification can also be used by applications outside the context of WebCodecs or a web browser.
-While the media payloads are defined by referring to the "internal data" of an 
+While the media payloads are defined by referring to the "internal data" of an
 EncodedAudioChunk or EncodedVideoChunk in the WebCodecs Codec Registry, this "internal data"
 is the elementary bitstream format of codecs without any encapsulation. Referring to the WebCodecs
 Codec Registry avoids duplicating it in an identical IANA registry.
@@ -141,7 +147,7 @@ defined by this specification.
 The following metadata MUST be captured for each media frame.
 
 Sequence Number: Identifies a sequentially increasing variable length integer that is
-incremented per encoded media frame. This may be replaced with the Object Sequence 
+incremented per encoded media frame. This may be replaced with the Object Sequence
 from the MOQ Object Header in cases where a MOQ Object is exactly one frame.
 
 Capture Timestamp in Microseconds: Captures the wall-clock time of the encoded media frame in a 64-bit unsigned integer.
@@ -219,7 +225,7 @@ The LOC Streaming Format allows the following optional extensions for video medi
 
 Each video track can have the following associated Selection Parameters.
 
-* odec: Codec information (including profile, level, tier, etc.), as defined by the codec registrations listed in {{WEBCODECS-CODEC-REGISTRY}}.
+* codec: Codec information (including profile, level, tier, etc.), as defined by the codec registrations listed in {{WEBCODECS-CODEC-REGISTRY}}.
 
 * framerate: As defined in section 7.8 of {{WEBCODECS-CODEC-REGISTRY}}.
 
@@ -260,7 +266,7 @@ See section 3.4 of the MOQ Common Catalog {{MoQCatalog}}.
 # Payload Encryption
 
 When end to end encryption is supported, the encoded payload is encrypted
-with symmetric keys derived from key establishment mechanisms, such as MLS, and the payload itself is protected using SFrame or other similar schemes. For encryption schemes which require a nonce or unique counter for every encrypted message, the combination of Object ID, Group ID, and Subscribe ID provide the required uniqueness to serve as an implicit nonce, which aligns with the goal of low overhead. 
+with symmetric keys derived from key establishment mechanisms, such as {{MOQ-MLS}}, and the payload itself is protected using mechanisms defined in {{SecureObjects}}.
 
 # Container Serialization
 
