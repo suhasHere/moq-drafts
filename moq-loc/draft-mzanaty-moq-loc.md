@@ -300,20 +300,19 @@ Below picture captures the conceptual model showing mapping at various levels of
 
 ~~~aasvg
 +------------------------------+
-|     Media Application        | ----+ frames
-+---------------+--------------+     |
-                |                    v
-                |   +-------------------------------+
-                |   |    Tracks, Groups, Objects    |
-                |   +-------------------------------+
- +--------------v---------------+
- |     MOQT Object Model        |
- +--------------+---------------+
-                |  +----------------------------------------+
-                |  |        One or more SubGroups           |
-                |  +----------------------------------------+
+|     Media Application        |
++---------------+--------------+
+                |  frames
+                |
++---------------v-------------------+
+|        MOQT Object Model          |
+| Tracks, Groups, Subgrpups Objects |
++---------------+-------------------+
+                |
+                |
 +---------------v--------------+
 |            QUIC              |
+|   QUIC Streams or Datagrams  |
 +------------------------------+
 ~~~
 
