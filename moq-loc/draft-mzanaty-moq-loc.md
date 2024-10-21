@@ -68,6 +68,8 @@ WebCodecs Codec Registry {{WEBCODECS-CODEC-REGISTRY}}.
 The audio and video payload bitstream is identical to the "internal data"
 inside an EncodedAudioChunk and EncodedVideoChunk, respectively, specified in the registry.
 
+(Note: Do we need to support timed text tracks such as Web Video Text Tracks (WebVTT) ?)
+
 In addition to the media payloads, critical metadata is also specified for audio and video payloads.
 (Note: Align with MOQT terminology of either "metadata" or "header".)
 
@@ -98,7 +100,9 @@ interpreted as described in {{!RFC2119}}.
 
 ## Terminology
 
-TODO
+Track, Group, Subgroup, Object, and their corresponding identifiers (ID or alias)
+are defined in {{MoQTransport}} and used here to refer to those aspects of the
+MOQT Object Model.
 
 # Payload Format {#payload}
 
@@ -108,11 +112,11 @@ EncodedVideoChunk for the audio and video codec formats in the registry. The
 the "LOC Payload" bitstream. This "internal data" is the elementary bitstream format
 of each codec without any encapsulation.
 
-For video formats with multiple bitstream formats in the WebCodecs Registry, such as H.264/AVC or H.265/HEVC, the LOC Payload uses the "canonical" format ("avcc" or "hevc", not "annexB") with the following additions:
-* Parameter sets are sent in the bitstream before key frames.
-* 4 byte lengths are sent before each NAL Unit.
-* No start codes or emulation prevention are used in the bitstream.
-* No additional codec configuration information ("extradata") is needed.
+For video formats with multiple bitstream formats in the WebCodecs Registry, such as H.264/AVC or H.265/HEVC, the LOC Payload uses the "canonical" format ("avc" or "hevc", not "annexB") with the following additions:
+* Parameter sets can be sent in the bitstream before key frames, similar to "annexB" formats. (Note that newer "canonical" formats such as "avc3" and "hev1" codec strings support parameter sets in the bitstream or outside it.)
+* Parameter sets can be provided by means outside this specification, such as "extradata" in "canonical" ("avc" or "hevc") formats.
+* 4 byte start codes can be sent before each NAL Unit, similar to "annexB" formats.
+* 4 byte length codes can be sent before each NAL Unit, similar to "canonical" ("avc" or "hevc") formats. (Note that a length of 1 should be interpreted as a start code rather than a length.)
 
 ## MOQ Object Mapping
 
@@ -122,22 +126,9 @@ specification populate the MOQ Object Payload with a LOC Header and LOC Payload 
 
 The LOC Payload is the "internal data" of an EncodedAudioChunk or EncodedVideoChunk.
 
-~~~ ascii-art
-
-+--------------+----------+-----------+
-|  MOQ Object  |  LOC     |  LOC      |
-|  Header      |  Header  |  Payload  |
-+--------------+----------------------+
-               <---------------------->
-                  MOQ Object Payload
-
-                  MOQ Object with LOC Container
-
-~~~
-
 ## LOC Header Metadata {#headers}
 
-The LOC Header carries metadata for the corresponding LOC Payload.
+The LOC Header carries metadata for the corresponding LOC Payload. The LOC Header is contained within the MOQT Object Header Extensions.
 This metadata provides necessary information for intermediaries such as media switches to
 perform their media switching decisions
 when the payload is inaccessible due to encryption.
@@ -146,12 +137,6 @@ Section {{reg}} provides a framework for registering new LOC Header fields that 
 defined by this specification.
 
 ### Common Header Data
-
-The following metadata MUST be captured for each media frame.
-
-Sequence Number: Identifies a sequentially increasing variable length integer that is
-incremented per encoded media frame. This may be replaced with the Object Sequence
-from the MOQ Object Header in cases where a MOQ Object is exactly one frame.
 
 Capture Timestamp in Microseconds: Captures the wall-clock time of the encoded media frame in a 64-bit unsigned integer.
 
